@@ -885,7 +885,7 @@ export default function Home() {
 
         <div aria-hidden="true" className="section-bridge" />
 
-        <div className="relative z-30 -mt-24 bg-[linear-gradient(180deg,#02030a_0%,#02030a_18%,#040612_52%,#03040c_100%)]">
+        <div className="relative z-30 bg-void">
           <Content />
         </div>
       </main>
