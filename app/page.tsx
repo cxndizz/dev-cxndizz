@@ -12,89 +12,100 @@ import {
 import moon from "../img/moon.webp";
 
 const navItems = [
-  { label: "Profile", href: "#profile" },
-  { label: "Services", href: "#services" },
-  { label: "Work", href: "#work" },
-  { label: "Process", href: "#process" },
-  { label: "Web3", href: "#web3" },
+  { label: "เกี่ยวกับฉัน", href: "#profile" },
+  { label: "บริการ", href: "#services" },
+  { label: "ผลงาน", href: "#work" },
+  { label: "กระบวนการ", href: "#process" },
+  { label: "โฟกัสปัจจุบัน", href: "#focus" },
 ];
 
 const services = [
   {
-    title: "Product Frontends",
-    copy: "Responsive interfaces for dashboards, marketplaces, portals, and client-facing SaaS workflows.",
+    title: "ระบบ Full Stack Web App",
+    copy: "พัฒนาเว็บแอปพลิเคชันแบบครบวงจร สำหรับงาน booking, commerce และเครื่องมือภายในองค์กร ตั้งแต่ frontend จนถึง backend และ database",
   },
   {
-    title: "Backend & APIs",
-    copy: "Typed APIs, database models, integrations, auth, background jobs, and operational tooling.",
+    title: "Backend & API Development",
+    copy: "ออกแบบและสร้าง API ที่บำรุงรักษาง่าย ด้วย Spring Boot, Node.js, NestJS และ Express เน้นโครงสร้างที่สะอาดและขยายตัวได้",
   },
   {
-    title: "Automation Systems",
-    copy: "Internal systems that remove repetitive work: approvals, alerts, scheduled jobs, and data syncs.",
+    title: "Database & ระบบจัดการข้อมูล",
+    copy: "ออกแบบฐานข้อมูลที่รองรับการใช้งานจริง ด้วย PostgreSQL, Oracle, MySQL, MongoDB พร้อม Prisma ORM และระบบ cache ด้วย Redis",
   },
   {
-    title: "SaaS MVP Builds",
-    copy: "From scope to launch: product architecture, feature delivery, admin tools, and deployment readiness.",
+    title: "Frontend ที่เน้น UX จริงจัง",
+    copy: "สร้างหน้าจอที่ตอบสนองดีและใช้งานสะดวก ด้วย Next.js, React, TypeScript, Tailwind CSS และ Bootstrap",
   },
   {
-    title: "Web3 Interfaces",
-    copy: "Wallet-aware screens, read-only contract data, token views, and transaction preview patterns.",
+    title: "LINE Integration & Automation",
+    copy: "เชื่อมระบบเข้ากับ LINE และสร้าง workflow อัตโนมัติเพื่อลดงานซ้ำซ้อนภายในองค์กร พร้อมการแจ้งเตือนแบบ real-time",
   },
   {
-    title: "Technical Rescue",
-    copy: "Stabilizing slow, fragile, or unfinished builds with clean refactors and practical delivery plans.",
+    title: "Production-Ready Architecture",
+    copy: "วางสถาปัตยกรรมระบบที่พร้อมขึ้น production ด้วย Docker, Kubernetes, Nginx รวมถึงการนำ AI เข้ามาใช้ในงานจริง",
   },
 ];
 
 const projects = [
   {
-    title: "Atlas Client OS",
-    type: "SaaS portal",
-    metric: "4 week MVP",
-    copy: "A secure workspace for project approvals, payment states, task history, and client handoff.",
+    title: "ระบบจองคิวออนไลน์",
+    type: "Full Stack Web App",
+    metric: "Next.js + Spring Boot",
+    copy: "ระบบจองคิวและจัดตารางเวลาแบบครบวงจร พร้อมการแจ้งเตือนผ่าน LINE และหน้า admin ที่จัดการง่าย รองรับการใช้งานพร้อมกันจำนวนมาก",
   },
   {
-    title: "Signal Vault",
-    type: "Web3 frontend",
-    metric: "read-only demo",
-    copy: "Wallet-style portfolio screens, contract status panels, and token metadata views without requiring signatures.",
+    title: "ระบบ E-Commerce",
+    type: "Backend + Frontend",
+    metric: "Node.js + PostgreSQL",
+    copy: "เว็บแอปขายของออนไลน์ พร้อมระบบสมาชิก ตะกร้าสินค้า การชำระเงิน และแดชบอร์ดผู้ดูแลระบบที่ยืดหยุ่นต่อการเพิ่มฟีเจอร์ใหม่",
   },
   {
-    title: "Ops Relay",
-    type: "Automation",
-    metric: "12 workflows",
-    copy: "Queue-based automation for notifications, CRM sync, review steps, and weekly reporting.",
+    title: "เครื่องมือภายในองค์กร",
+    type: "Internal Tool",
+    metric: "Laravel + Oracle",
+    copy: "ระบบจัดการงานเอกสารและข้อมูลภายในองค์กร เชื่อมกับ Oracle Database และมีสคริปต์ automation ที่ช่วยให้ทีมงานลดเวลาทำงานซ้ำได้จริง",
   },
 ];
 
 const process = [
-  "Scope the product surface and remove unclear work before code starts.",
-  "Build the core flow first, then harden edge cases, states, and integrations.",
-  "Ship in short review loops with clean handoff notes and production-minded defaults.",
+  "ทำความเข้าใจโจทย์และเป้าหมายของระบบ ตัดส่วนที่ยังไม่ชัดเจนออกก่อนเริ่มเขียนโค้ดจริง",
+  "สร้าง flow หลักให้ใช้งานได้ก่อน แล้วค่อยเก็บรายละเอียด edge case รวมถึงการเชื่อมต่อกับระบบอื่น",
+  "ส่งงานเป็นรอบสั้น ๆ พร้อมเอกสารที่ชัดเจน และทดสอบให้พร้อมขึ้น production ได้ทันที",
 ];
 
 const stack = [
   "Next.js",
-  "TypeScript",
   "React",
-  "Tailwind",
-  "Framer Motion",
+  "TypeScript",
+  "JavaScript",
+  "Tailwind CSS",
+  "Bootstrap",
+  "Java",
+  "Spring Boot",
   "Node.js",
+  "Express",
+  "NestJS",
+  "PHP",
+  "Laravel",
   "PostgreSQL",
-  "Prisma",
+  "Oracle",
+  "MySQL",
+  "MongoDB",
   "Redis",
-  "REST",
-  "GraphQL",
-  "Viem",
-  "Wagmi",
-  "Ethers",
+  "Prisma",
+  "Docker",
+  "Kubernetes",
+  "Git",
+  "GitLab",
+  "Nginx",
+  "PowerShell",
 ];
 
 const capabilityRows = [
-  ["Wallet state", "Connect flows, account views, network states, and graceful disconnected screens."],
-  ["Contract panels", "Read/write form layouts, validation, estimated costs, and clear confirmation states."],
-  ["Asset views", "Token balances, NFT metadata, activity tables, and portfolio-style UI patterns."],
-  ["No-risk demos", "Placeholder transaction flows for pitch decks, product demos, and internal prototypes."],
+  ["Full Stack Workflow", "พัฒนาทั้งฝั่ง frontend และ backend ให้สอดคล้องกัน เพื่อสร้าง product flow ที่ดีขึ้นและส่งมอบเร็ว"],
+  ["Backend & Database", "ปรับปรุงสถาปัตยกรรมรอบ ๆ บริการ backend และฐานข้อมูลให้เสถียร ขยายตัวได้ และดูแลรักษาง่าย"],
+  ["AI & Automation", "ทดลองใช้ AI และ automation ในโปรเจกต์จริง เพื่อช่วยให้ทีมงานทำงานเร็วขึ้นและลดงานซ้ำซ้อน"],
+  ["LINE & Integration", "เชื่อมระบบเข้ากับ LINE OA และบริการภายนอก เพื่อตอบสนองผู้ใช้แบบทันทีและทำงานอัตโนมัติ"],
 ];
 
 function Stars() {
@@ -252,7 +263,7 @@ export default function Home() {
             <div className="absolute inset-x-[-16%] bottom-[4%] h-[42%] bg-violet-500/[0.07] blur-3xl" />
             <Image
               src={moon}
-              alt="Realistic moon rising across a black space banner"
+              alt="ภาพดวงจันทร์ลอยขึ้นเหนือพื้นที่อวกาศสีดำ"
               priority
               fill
               sizes="100vw"
@@ -274,43 +285,43 @@ export default function Home() {
               <div className="max-w-4xl">
                 <div className="mb-7 inline-flex items-center gap-3 rounded-full border border-white/[0.08] bg-black/30 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.28em] text-sky-100/90 shadow-[0_18px_70px_rgba(0,0,0,.28)] backdrop-blur-2xl">
                   <span className="h-1.5 w-1.5 rounded-full bg-sky-300 shadow-[0_0_18px_rgba(56,189,248,.95)]" />
-                  Independent Software Engineer
+                  Full Stack Developer
                 </div>
                 <h1 className="max-w-[980px] text-[clamp(3.25rem,6.7vw,7.4rem)] font-semibold leading-[0.92] tracking-[-0.055em] text-white">
-                  Building digital products beyond ordinary.
+                  พัฒนาเว็บแอปที่เน้น backend แข็งแรง และ product mindset ที่ใช้ได้จริง
                 </h1>
                 <p className="mt-7 max-w-2xl text-base leading-8 text-white/68 sm:text-lg md:text-xl">
-                  Freelance programmer crafting modern web apps, automation systems, and Web3-ready digital experiences.
+                  Full Stack Developer ที่ทำงานอยู่ตรงจุดตัดระหว่าง UI ที่สะอาด, API ที่เชื่อถือได้ และฐานข้อมูลที่ออกแบบมาเพื่อรองรับการใช้งานจริง
                 </p>
                 <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                   <a
                     href="#contact"
                     className="rounded-full bg-white px-6 py-3 text-center text-sm font-semibold text-black shadow-[0_16px_50px_rgba(255,255,255,.12)] transition hover:bg-sky-100"
                   >
-                    Start a Project
+                    เริ่มโปรเจกต์
                   </a>
                   <a
                     href="#work"
                     className="rounded-full border border-white/16 bg-white/[0.045] px-6 py-3 text-center text-sm font-semibold text-white backdrop-blur-xl transition hover:border-sky-200/45 hover:bg-sky-300/10"
                   >
-                    View Work
+                    ดูผลงาน
                   </a>
                 </div>
               </div>
 
               <GlassCard className="hidden rounded-2xl bg-black/24 p-5 lg:block">
-                <p className="text-[11px] uppercase tracking-[0.24em] text-white/42">Now Booking</p>
+                <p className="text-[11px] uppercase tracking-[0.24em] text-white/42">พร้อมรับงาน</p>
                 <p className="mt-3 text-xl font-semibold leading-snug tracking-[-0.03em]">
-                  Product builds, automation, and interface systems.
+                  ระบบ Full Stack, Backend และฐานข้อมูลที่ออกแบบมาเพื่อใช้งานจริง
                 </p>
                 <div className="mt-6 grid grid-cols-2 gap-3 text-sm">
                   <div>
-                    <p className="text-2xl font-semibold text-sky-100">6+</p>
-                    <p className="mt-1 text-white/42">Build lanes</p>
+                    <p className="text-2xl font-semibold text-sky-100">25+</p>
+                    <p className="mt-1 text-white/42">เทคโนโลยีที่ใช้</p>
                   </div>
                   <div>
                     <p className="text-2xl font-semibold text-violet-100">1:1</p>
-                    <p className="mt-1 text-white/42">Direct delivery</p>
+                    <p className="mt-1 text-white/42">ส่งมอบงานตรง</p>
                   </div>
                 </div>
               </GlassCard>
@@ -347,7 +358,7 @@ function FloatingNav() {
           </span>
           <span className="hidden sm:inline">CXN</span>
         </a>
-        <div className="hidden items-center gap-1 rounded-full bg-white/[0.035] p-1 text-[11px] font-medium uppercase tracking-[0.18em] text-white/58 lg:flex">
+        <div className="hidden items-center gap-1 rounded-full bg-white/[0.035] p-1 text-[11px] font-medium tracking-[0.12em] text-white/58 lg:flex">
           {navItems.map((item) => (
             <a
               key={item.href}
@@ -360,9 +371,9 @@ function FloatingNav() {
         </div>
         <a
           href="#contact"
-          className="rounded-full bg-sky-300 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-black shadow-[0_0_34px_rgba(56,189,248,.24)] transition hover:bg-white"
+          className="rounded-full bg-sky-300 px-4 py-2 text-xs font-bold tracking-[0.08em] text-black shadow-[0_0_34px_rgba(56,189,248,.24)] transition hover:bg-white"
         >
-          Hire Me
+          ติดต่อฉัน
         </a>
       </div>
     </nav>
@@ -378,20 +389,20 @@ function DisplayState() {
         <div className="hud-panel p-4 md:p-5">
           <div className="flex items-center justify-between gap-4">
             <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-sky-200/72">
-              Display State
+              สถานะระบบ
             </p>
             <span className="rounded-full border border-emerald-300/18 bg-emerald-300/[0.08] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-100/80">
-              Live
+              ออนไลน์
             </span>
           </div>
           <p className="mt-4 text-xl font-semibold tracking-[-0.04em] text-white md:text-2xl">
-            Product system online
+            ระบบพร้อมใช้งาน
           </p>
           <p className="mt-3 hidden text-sm leading-6 text-white/48 md:block">
-            UI, API, automation, and wallet-ready surfaces moving as one build.
+            UI, API, Database และระบบ automation ทำงานสอดประสานกันเป็น build เดียว
           </p>
           <div className="mt-5 hidden grid-cols-3 gap-2 md:grid">
-            {["UI", "API", "OPS"].map((item, index) => (
+            {["UI", "API", "DB"].map((item, index) => (
               <span
                 key={item}
                 className="rounded-full border border-white/[0.07] bg-white/[0.035] px-3 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50"
@@ -409,9 +420,9 @@ function DisplayState() {
           <div className="grid grid-cols-2 gap-3">
             {[
               ["Frontend", "96%", "w-[96%]"],
-              ["API Layer", "88%", "w-[88%]"],
-              ["Automation", "74%", "w-[74%]"],
-              ["Web3 UI", "Preview", "w-[64%]"],
+              ["Backend", "92%", "w-[92%]"],
+              ["Database", "88%", "w-[88%]"],
+              ["DevOps", "74%", "w-[74%]"],
             ].map(([label, value, width], index) => (
               <div
                 key={label}
@@ -433,12 +444,12 @@ function DisplayState() {
         </div>
 
         <div className="hud-panel hidden p-5 lg:block">
-          <p className="text-[10px] uppercase tracking-[0.22em] text-violet-200/62">Motion Queue</p>
+          <p className="text-[10px] uppercase tracking-[0.22em] text-violet-200/62">ลำดับงาน</p>
           <div className="mt-5 space-y-4">
             {[
-              ["01", "Scope locked"],
-              ["02", "Prototype moving"],
-              ["03", "Launch path clear"],
+              ["01", "วางขอบเขตชัดเจน"],
+              ["02", "Prototype พร้อมทดสอบ"],
+              ["03", "ส่งขึ้น Production"],
             ].map(([step, item], index) => (
               <div key={item} className="hud-row flex items-center gap-3 text-sm text-white/62" style={{ animationDelay: `${index * 0.28}s` }}>
                 <span className="grid h-7 w-7 place-items-center rounded-full border border-sky-200/14 bg-sky-300/[0.06] text-[10px] text-sky-100/70">
@@ -450,8 +461,8 @@ function DisplayState() {
           </div>
           <div className="mt-6 rounded-2xl border border-white/[0.07] bg-black/18 p-3">
             <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.18em] text-white/36">
-              <span>Signal</span>
-              <span>Stable</span>
+              <span>สัญญาณ</span>
+              <span>เสถียร</span>
             </div>
             <div className="mt-3 flex h-10 items-end gap-1">
               {[40, 68, 52, 82, 60, 92, 76, 58, 86, 70].map((height, index) => (
@@ -481,17 +492,17 @@ function Content() {
           viewport={{ once: true, amount: 0.28 }}
           transition={{ duration: 0.75, ease: "easeOut" }}
         >
-          <SectionEyebrow>Profile</SectionEyebrow>
+          <SectionEyebrow>เกี่ยวกับฉัน</SectionEyebrow>
           <div>
             <h2 className="max-w-4xl text-3xl font-semibold leading-[1.04] tracking-[-0.04em] md:text-6xl">
-              I turn product ideas into clean, durable software that feels ready for real users.
+              พัฒนาเว็บแอปด้วย backend ที่แข็งแรง บน mindset ของ product engineering ที่ใช้งานได้จริง
             </h2>
             <div className="mt-8 grid gap-5 text-base leading-8 text-white/58 md:grid-cols-2">
               <p>
-                My work sits between product design and engineering: clear interfaces, practical architecture, typed data flows, and smooth user states.
+                งานของฉันอยู่ตรงจุดตัดระหว่าง UI ที่สะอาด, API ที่เชื่อถือได้ และฐานข้อมูลที่ออกแบบมาให้รองรับการใช้งานจริงในระยะยาว
               </p>
               <p>
-                I help founders, teams, and operators ship web apps, MVPs, automations, and Web3-facing UI without turning the product into a science project.
+                สนใจเรื่อง AI, system design, Kubernetes และสถาปัตยกรรมที่พร้อม production สามารถทำงานได้ตั้งแต่ frontend UX ไปจนถึง backend และ deployment workflow
               </p>
             </div>
           </div>
@@ -505,9 +516,9 @@ function Content() {
           transition={{ duration: 0.7, ease: "easeOut" }}
         >
           {[
-            ["Build focus", "Web apps, dashboards, SaaS MVPs"],
-            ["Delivery style", "Async-friendly, direct, documented"],
-            ["Experience layer", "Frontend polish with backend judgment"],
+            ["จุดเด่น", "Full Stack Web App, Backend, Database"],
+            ["สไตล์การทำงาน", "ตรงไปตรงมา มีเอกสาร ทำงานแบบ async ได้"],
+            ["ประสบการณ์", "Frontend ที่ละเอียด + Backend ที่เข้าใจ business"],
           ].map(([label, value]) => (
             <div key={label} className="bg-[#050712] p-5">
               <p className="text-[11px] uppercase tracking-[0.22em] text-sky-200/60">{label}</p>
@@ -517,7 +528,7 @@ function Content() {
         </motion.section>
 
         <section id="services" className="scroll-mt-32 py-16 md:py-20">
-          <SectionHeader eyebrow="Services" title="Senior execution for the parts that make a product feel finished." />
+          <SectionHeader eyebrow="บริการ" title="งานเขียนโค้ดที่ทำให้ product พร้อมใช้งานจริงตั้งแต่บรรทัดแรก" />
           <div className="mt-10 divide-y divide-white/[0.08] border-y border-white/[0.08]">
             {services.map((service, index) => (
               <motion.div
@@ -542,7 +553,7 @@ function Content() {
         </section>
 
         <section id="work" className="scroll-mt-32 py-16 md:py-20">
-          <SectionHeader eyebrow="Selected Work" title="Representative builds with product-grade structure." />
+          <SectionHeader eyebrow="ผลงานที่เลือกมา" title="ตัวอย่างงานที่ออกแบบมาเพื่อใช้งานจริง ไม่ใช่แค่ demo" />
           <div className="mt-10 space-y-4">
             {projects.map((project) => (
               <motion.div
@@ -568,9 +579,9 @@ function Content() {
 
         <section id="process" className="scroll-mt-32 grid gap-10 py-16 md:py-20 lg:grid-cols-[0.85fr_1.15fr]">
           <div>
-            <SectionEyebrow>Process</SectionEyebrow>
+            <SectionEyebrow>กระบวนการทำงาน</SectionEyebrow>
             <h2 className="mt-5 text-3xl font-semibold leading-[1.05] tracking-[-0.04em] md:text-5xl">
-              Calm delivery. Clear decisions. No theatrical complexity.
+              ส่งมอบงานอย่างเรียบง่าย ตัดสินใจชัดเจน ไม่มีความซับซ้อนที่ไม่จำเป็น
             </h2>
           </div>
           <div className="divide-y divide-white/[0.08] border-y border-white/[0.08]">
@@ -591,7 +602,7 @@ function Content() {
         </section>
 
         <section id="stack" className="scroll-mt-32 py-16 md:py-20">
-          <SectionHeader eyebrow="Tech Stack" title="Modern tools chosen for speed, maintainability, and deployment." />
+          <SectionHeader eyebrow="Core Stack" title="เครื่องมือที่ใช้จริง เลือกมาเพื่อความเร็ว ดูแลง่าย และพร้อม deploy" />
           <div className="mt-10 flex flex-wrap gap-3">
             {stack.map((item) => (
               <span
@@ -604,9 +615,9 @@ function Content() {
           </div>
         </section>
 
-        <section id="web3" className="scroll-mt-32 grid gap-6 py-16 md:py-20 lg:grid-cols-[1fr_0.9fr]">
+        <section id="focus" className="scroll-mt-32 grid gap-6 py-16 md:py-20 lg:grid-cols-[1fr_0.9fr]">
           <div>
-            <SectionHeader eyebrow="Web3 Capabilities" title="Wallet-style product experiences without casino energy." />
+            <SectionHeader eyebrow="โฟกัสปัจจุบัน" title="กำลังทำอะไร และสนใจเรื่องไหนเป็นพิเศษในตอนนี้" />
             <div className="mt-9 divide-y divide-white/[0.08] overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.035] backdrop-blur-2xl">
               {capabilityRows.map(([title, copy]) => (
                 <div key={title} className="grid gap-2 p-5 sm:grid-cols-[0.35fr_0.65fr]">
@@ -618,16 +629,16 @@ function Content() {
           </div>
           <div className="rounded-[1.6rem] border border-white/[0.08] bg-[#050712] p-6">
             <div className="flex items-center justify-between">
-              <p className="text-[11px] uppercase tracking-[0.24em] text-sky-200/70">Demo wallet card</p>
+              <p className="text-[11px] uppercase tracking-[0.24em] text-sky-200/70">ภาพรวมระบบ</p>
               <span className="rounded-full border border-emerald-300/18 bg-emerald-300/[0.08] px-3 py-1 text-xs text-emerald-100">
-                No transactions
+                Stable
               </span>
             </div>
             <div className="mt-8 rounded-2xl border border-white/[0.08] bg-black/32 p-5">
-              <p className="text-sm text-white/45">0x8f34...A91c</p>
-              <p className="mt-3 text-5xl font-semibold tracking-[-0.05em]">12.84 ETH</p>
+              <p className="text-sm text-white/45">api.cxndizz.dev</p>
+              <p className="mt-3 text-5xl font-semibold tracking-[-0.05em]">99.8%</p>
               <div className="mt-7 grid grid-cols-2 gap-3 text-sm text-white/62">
-                {["Gas preview", "Contract state", "Token metadata", "Read-only calls"].map((item) => (
+                {["API Health", "DB Status", "Cache Layer", "Background Jobs"].map((item) => (
                   <div key={item} className="rounded-xl border border-white/[0.06] bg-white/[0.04] p-3">
                     {item}
                   </div>
@@ -635,7 +646,7 @@ function Content() {
               </div>
             </div>
             <p className="mt-5 text-sm leading-6 text-white/45">
-              Placeholder smart contract UI demos only. No wallet connection, signatures, or real blockchain transactions are required.
+              ตัวอย่างการ์ดสรุปสถานะระบบ ใช้แสดง health check ของ API, ฐานข้อมูล และ background job ในรูปแบบที่อ่านง่าย
             </p>
           </div>
         </section>
@@ -643,17 +654,17 @@ function Content() {
         <section className="py-16 md:py-20">
           <div className="rounded-[2rem] border border-white/[0.08] bg-[radial-gradient(circle_at_18%_20%,rgba(56,189,248,.16),transparent_28rem),radial-gradient(circle_at_84%_40%,rgba(139,92,246,.12),transparent_25rem),rgba(255,255,255,.035)] p-6 backdrop-blur-2xl sm:p-8 lg:p-10">
             <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
-              <SectionEyebrow>Fit</SectionEyebrow>
+              <SectionEyebrow>เหมาะกับใคร</SectionEyebrow>
               <div>
                 <h2 className="text-3xl font-semibold leading-[1.04] tracking-[-0.04em] md:text-5xl">
-                  Best for founders and teams who need a capable builder, not a handoff maze.
+                  เหมาะกับเจ้าของไอเดียและทีมที่ต้องการคนสร้างจริง ไม่ใช่แค่คนรับงานต่อ
                 </h2>
                 <div className="mt-8 grid gap-3 sm:grid-cols-2">
                   {[
-                    "You have a product direction but need execution clarity.",
-                    "You need frontend polish and backend follow-through.",
-                    "You want a Web3 demo without forcing wallet setup.",
-                    "You care about responsive details across devices.",
+                    "มีไอเดียโปรดักต์ชัดเจน แต่ต้องการคนช่วย execute ให้ได้จริง",
+                    "ต้องการ frontend ที่ละเอียดและ backend ที่ตามมาได้ครบ",
+                    "อยากได้ระบบที่เชื่อมกับ LINE หรือ workflow อัตโนมัติ",
+                    "ใส่ใจรายละเอียดบนทุกอุปกรณ์และความเสถียรของระบบ",
                   ].map((item) => (
                     <div key={item} className="rounded-2xl bg-black/22 p-4 text-sm leading-7 text-white/58">
                       {item}
@@ -668,20 +679,38 @@ function Content() {
         <section id="contact" className="scroll-mt-32 py-16 md:py-20">
           <div className="grid gap-8 rounded-[2rem] border border-white/[0.09] bg-white/[0.045] p-6 shadow-[0_26px_110px_rgba(0,0,0,.32)] backdrop-blur-2xl sm:p-8 lg:grid-cols-[1fr_auto] lg:p-10">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.28em] text-sky-200/70">Contact</p>
+              <p className="text-[11px] uppercase tracking-[0.28em] text-sky-200/70">ติดต่อฉัน</p>
               <h2 className="mt-5 max-w-3xl text-4xl font-semibold leading-[1] tracking-[-0.05em] md:text-6xl">
-                Let’s build the part of your product users actually touch.
+                มาช่วยกันสร้างส่วนของ product ที่ผู้ใช้สัมผัสจริง ๆ
               </h2>
               <p className="mt-6 max-w-2xl leading-8 text-white/55">
-                Send the product goal, current stage, and the highest-risk piece. I’ll help shape a practical build path.
+                บอกเป้าหมายของโปรดักต์ สถานะปัจจุบัน และส่วนที่กังวลที่สุดมาได้เลย จะช่วยวางแผนการพัฒนาที่ใช้งานได้จริงให้
               </p>
+              <div className="mt-8 grid gap-3 text-sm text-white/68 sm:grid-cols-2">
+                <a
+                  href="mailto:khun.chakkri@gmail.com"
+                  className="flex items-center justify-between gap-3 rounded-2xl border border-white/[0.08] bg-black/22 p-4 transition hover:border-sky-200/40 hover:bg-sky-300/[0.06]"
+                >
+                  <span className="text-[11px] uppercase tracking-[0.22em] text-white/42">Email</span>
+                  <span className="text-white/86">khun.chakkri@gmail.com</span>
+                </a>
+                <a
+                  href="https://github.com/cxndizz"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-between gap-3 rounded-2xl border border-white/[0.08] bg-black/22 p-4 transition hover:border-sky-200/40 hover:bg-sky-300/[0.06]"
+                >
+                  <span className="text-[11px] uppercase tracking-[0.22em] text-white/42">GitHub</span>
+                  <span className="text-white/86">github.com/cxndizz</span>
+                </a>
+              </div>
             </div>
             <div className="flex flex-col justify-end gap-3 sm:flex-row lg:flex-col">
-              <a href="mailto:hello@example.com" className="rounded-full bg-white px-6 py-3 text-center text-sm font-semibold text-black transition hover:bg-sky-100">
-                Start a Project
+              <a href="mailto:khun.chakkri@gmail.com" className="rounded-full bg-white px-6 py-3 text-center text-sm font-semibold text-black transition hover:bg-sky-100">
+                ส่งอีเมลหาฉัน
               </a>
               <a href="#work" className="rounded-full border border-white/14 px-6 py-3 text-center text-sm font-semibold text-white/78 transition hover:bg-white/[0.06]">
-                Review Work
+                ดูผลงานเพิ่มเติม
               </a>
             </div>
           </div>
@@ -700,19 +729,19 @@ function Footer() {
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.3em]">CXN</p>
           <p className="mt-4 max-w-xl text-sm leading-7 text-white/45">
-            Freelance software engineering for polished web products, automation systems, and Web3-ready interfaces.
+            Full Stack Developer ที่เน้นการพัฒนาเว็บแอป ระบบ backend และ database ที่ออกแบบมาเพื่อใช้งานจริง
           </p>
         </div>
         <div className="flex flex-wrap gap-4 text-sm text-white/45">
-          <a className="transition hover:text-white" href="#profile">Profile</a>
-          <a className="transition hover:text-white" href="#services">Services</a>
-          <a className="transition hover:text-white" href="#work">Work</a>
-          <a className="transition hover:text-white" href="#contact">Contact</a>
+          <a className="transition hover:text-white" href="#profile">เกี่ยวกับฉัน</a>
+          <a className="transition hover:text-white" href="#services">บริการ</a>
+          <a className="transition hover:text-white" href="#work">ผลงาน</a>
+          <a className="transition hover:text-white" href="#contact">ติดต่อ</a>
         </div>
       </div>
       <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 pb-8 text-xs uppercase tracking-[0.2em] text-white/30 sm:px-8 md:flex-row md:justify-between">
-        <p>© 2026 CXN. All rights reserved.</p>
-        <p>Built for fast, responsive delivery.</p>
+        <p>© 2026 CXN. สงวนลิขสิทธิ์</p>
+        <p>ออกแบบมาเพื่อความเร็วและตอบสนองทุกอุปกรณ์</p>
       </div>
     </footer>
   );
