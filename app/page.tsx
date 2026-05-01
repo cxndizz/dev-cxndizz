@@ -857,8 +857,8 @@ export default function Home() {
               />
             </motion.div>
 
-            <div className="pointer-events-none absolute inset-0 z-20 bg-[linear-gradient(180deg,#02030a_0%,rgba(2,3,10,.94)_17%,rgba(2,3,10,.76)_42%,rgba(2,3,10,.16)_72%,rgba(2,3,10,.62)_92%,#02030a_100%)]" />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[48vh] bg-[linear-gradient(180deg,transparent_0%,rgba(2,3,10,.45)_28%,rgba(2,3,10,.85)_64%,#02030a_92%)]" />
+            <div className="pointer-events-none absolute inset-0 z-20 bg-[linear-gradient(180deg,#02030a_0%,rgba(2,3,10,.94)_17%,rgba(2,3,10,.74)_42%,rgba(2,3,10,.18)_70%,rgba(2,3,10,.42)_86%,rgba(2,3,10,.78)_96%,#02030a_100%)]" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[58vh] bg-[linear-gradient(180deg,transparent_0%,rgba(2,3,10,.18)_22%,rgba(2,3,10,.5)_48%,rgba(2,3,10,.82)_74%,rgba(2,3,10,.96)_92%,#02030a_100%)]" />
 
             <motion.div
               className="relative z-30 mx-auto flex h-full max-w-7xl transform-gpu items-center px-5 pt-24 will-change-transform sm:px-8 lg:pt-20"
@@ -885,7 +885,7 @@ export default function Home() {
 
         <div aria-hidden="true" className="section-bridge" />
 
-        <div className="relative z-30 -mt-16 bg-[linear-gradient(180deg,#02030a_0%,#050713_34%,#03040c_100%)]">
+        <div className="relative z-30 -mt-24 bg-[linear-gradient(180deg,#02030a_0%,#02030a_18%,#040612_52%,#03040c_100%)]">
           <Content />
         </div>
       </main>
