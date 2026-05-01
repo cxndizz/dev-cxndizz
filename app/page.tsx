@@ -141,13 +141,30 @@ const dict = {
       snapshotEyebrow: "ภาพรวมระบบ",
       snapshotStatus: "Stable",
       snapshotEndpoint: "api.cxndizz.dev",
-      snapshotMetric: 99.8,
-      snapshotItems: ["API Health", "DB Status", "Cache Layer", "Background Jobs"],
-      snapshotCaption: "ตัวอย่าง dashboard แสดงสถานะ API กับฐานข้อมูลแบบ real-time",
+      snapshotVersion: "v2.4.1",
+      snapshotRegion: "ap-southeast-1",
+      snapshotMetricsEyebrow: "ตัวชี้วัด · 24 ชม.",
+      snapshotMetrics: [
+        { value: "99.8", suffix: "%", label: "Uptime", trend: "+0.1" },
+        { value: "142", suffix: "ms", label: "Response p95", trend: "-8" },
+        { value: "12.4", suffix: "k", label: "Requests / วัน", trend: "+1.2k" },
+        { value: "0.02", suffix: "%", label: "Error rate", trend: "-0.01" },
+      ],
+      snapshotServicesEyebrow: "บริการที่ตรวจสอบ",
+      snapshotServices: [
+        { name: "API Server", value: "142ms", level: 92 },
+        { name: "PostgreSQL", value: "8ms", level: 96 },
+        { name: "Redis Cache", value: "1ms", level: 99 },
+        { name: "Worker Queue", value: "24 / นาที", level: 84 },
+      ],
+      snapshotTrafficEyebrow: "Traffic 12 ชม.",
+      snapshotDeployLabel: "Deploy ล่าสุด",
+      snapshotDeploy: "2 ชั่วโมงที่แล้ว · main",
+      snapshotChecks: "ผ่าน CI ทั้ง 24 รายการ",
     },
     fit: {
       eyebrow: "เหมาะกับใคร",
-      title: "เหมาะกับเจ้าของธุรกิจและทีมที่อยากทำของจริง ไม่ใช่แค่ wireframe",
+      title: "เหมาะกับเจ้าของธุรกิจและทีม ที่อยากได้คนทำจริง ไม่ใช่แค่ wireframe",
       items: [
         "มีไอเดียอยู่ในหัว แต่ยังไม่รู้จะเริ่มยังไง",
         "อยากได้คนทำทั้ง frontend และ backend ในคนเดียว",
@@ -163,6 +180,8 @@ const dict = {
       cta2: "ดูผลงานเพิ่ม",
       emailLabel: "อีเมล",
       githubLabel: "GitHub",
+      fastworkLabel: "Fastwork",
+      fastworkValue: "fastwork.co/user/aueasiripracha",
     },
     footer: {
       tagline: "Full Stack Developer รับทำเว็บแอป Backend และระบบฐานข้อมูล",
@@ -293,9 +312,26 @@ const dict = {
       snapshotEyebrow: "System overview",
       snapshotStatus: "Stable",
       snapshotEndpoint: "api.cxndizz.dev",
-      snapshotMetric: 99.8,
-      snapshotItems: ["API Health", "DB Status", "Cache Layer", "Background Jobs"],
-      snapshotCaption: "Sample dashboard showing API and database health in real time.",
+      snapshotVersion: "v2.4.1",
+      snapshotRegion: "ap-southeast-1",
+      snapshotMetricsEyebrow: "Metrics · 24h",
+      snapshotMetrics: [
+        { value: "99.8", suffix: "%", label: "Uptime", trend: "+0.1" },
+        { value: "142", suffix: "ms", label: "Response p95", trend: "-8" },
+        { value: "12.4", suffix: "k", label: "Requests / day", trend: "+1.2k" },
+        { value: "0.02", suffix: "%", label: "Error rate", trend: "-0.01" },
+      ],
+      snapshotServicesEyebrow: "Services monitored",
+      snapshotServices: [
+        { name: "API Server", value: "142ms", level: 92 },
+        { name: "PostgreSQL", value: "8ms", level: 96 },
+        { name: "Redis Cache", value: "1ms", level: 99 },
+        { name: "Worker Queue", value: "24 / min", level: 84 },
+      ],
+      snapshotTrafficEyebrow: "Traffic last 12h",
+      snapshotDeployLabel: "Last deploy",
+      snapshotDeploy: "2h ago · main",
+      snapshotChecks: "All 24 CI checks passed",
     },
     fit: {
       eyebrow: "Who this is for",
@@ -315,6 +351,8 @@ const dict = {
       cta2: "More work",
       emailLabel: "Email",
       githubLabel: "GitHub",
+      fastworkLabel: "Fastwork",
+      fastworkValue: "fastwork.co/user/aueasiripracha",
     },
     footer: {
       tagline: "Full stack developer building web apps, backend, and database systems.",
@@ -521,14 +559,19 @@ function Marquee({
   );
 }
 
-function CountUp({ to, suffix = "", duration = 1800 }: { to: number; suffix?: string; duration?: number }) {
+function CountUp({ to, suffix = "", duration = 1600 }: { to: number; suffix?: string; duration?: number }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, amount: 0.6 });
+  const inView = useInView(ref, { once: false, amount: 0.5 });
   const [val, setVal] = useState(0);
   const reduceMotion = useReducedMotion();
 
+  const decimals = Number.isInteger(to) ? 0 : to < 1 ? 2 : 1;
+
   useEffect(() => {
-    if (!inView) return;
+    if (!inView) {
+      setVal(0);
+      return;
+    }
     if (reduceMotion) {
       setVal(to);
       return;
@@ -547,7 +590,7 @@ function CountUp({ to, suffix = "", duration = 1800 }: { to: number; suffix?: st
 
   return (
     <span ref={ref}>
-      {val.toFixed(1)}
+      {val.toFixed(decimals)}
       {suffix}
     </span>
   );
@@ -570,7 +613,7 @@ function RevealText({
       className={className}
       initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
       whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      viewport={{ once: true, amount: 0.3 }}
+      viewport={{ once: false, amount: 0.2, margin: "-8% 0px" }}
       transition={{ duration: 0.8, ease: [0.2, 0.8, 0.2, 1], delay }}
     >
       {children}
@@ -814,8 +857,8 @@ export default function Home() {
               />
             </motion.div>
 
-            <div className="pointer-events-none absolute inset-0 z-20 bg-[linear-gradient(180deg,#02030a_0%,rgba(2,3,10,.94)_17%,rgba(2,3,10,.76)_42%,rgba(2,3,10,.08)_76%,rgba(2,3,10,.5)_100%)]" />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[32vh] bg-[linear-gradient(180deg,transparent_0%,rgba(2,3,10,.3)_36%,#02030a_100%)]" />
+            <div className="pointer-events-none absolute inset-0 z-20 bg-[linear-gradient(180deg,#02030a_0%,rgba(2,3,10,.94)_17%,rgba(2,3,10,.76)_42%,rgba(2,3,10,.16)_72%,rgba(2,3,10,.62)_92%,#02030a_100%)]" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[48vh] bg-[linear-gradient(180deg,transparent_0%,rgba(2,3,10,.45)_28%,rgba(2,3,10,.85)_64%,#02030a_92%)]" />
 
             <motion.div
               className="relative z-30 mx-auto flex h-full max-w-7xl transform-gpu items-center px-5 pt-24 will-change-transform sm:px-8 lg:pt-20"
@@ -840,7 +883,9 @@ export default function Home() {
           </div>
         </section>
 
-        <div className="relative z-30 bg-[linear-gradient(180deg,#02030a_0%,#050713_34%,#03040c_100%)]">
+        <div aria-hidden="true" className="section-bridge" />
+
+        <div className="relative z-30 -mt-16 bg-[linear-gradient(180deg,#02030a_0%,#050713_34%,#03040c_100%)]">
           <Content />
         </div>
       </main>
@@ -1085,6 +1130,133 @@ function DisplayState() {
   );
 }
 
+function SystemSnapshot() {
+  const { tx } = useI18n();
+  const fx = tx.focus;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: false, amount: 0.25, margin: "-5% 0px" }}
+      transition={{ duration: 0.7, ease: "easeOut" }}
+      className="glass-border relative h-full overflow-hidden rounded-[1.6rem] border border-white/[0.08] bg-[#050712] p-5 sm:p-6"
+    >
+      <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-sky-400/10 blur-3xl" />
+      <div className="pointer-events-none absolute -left-12 bottom-0 h-40 w-40 rounded-full bg-violet-500/10 blur-3xl" />
+
+      <div className="relative flex items-center justify-between gap-3">
+        <p className="text-[11px] tracking-[0.18em] text-sky-200/70">{fx.snapshotEyebrow}</p>
+        <span className="flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/[0.08] px-3 py-1 text-xs text-emerald-100">
+          <span className="live-ring h-1.5 w-1.5 rounded-full bg-emerald-300" />
+          {fx.snapshotStatus}
+        </span>
+      </div>
+
+      <div className="relative mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border border-white/[0.06] bg-black/30 px-4 py-3 font-mono text-[12px] text-white/60">
+        <span className="text-sky-200/80">GET</span>
+        <span className="truncate text-white/80">{fx.snapshotEndpoint}</span>
+        <span className="rounded-full border border-white/[0.08] bg-white/[0.05] px-2 py-0.5 text-[10px] text-white/55">
+          {fx.snapshotVersion}
+        </span>
+        <span className="rounded-full border border-white/[0.08] bg-white/[0.05] px-2 py-0.5 text-[10px] text-white/55">
+          {fx.snapshotRegion}
+        </span>
+      </div>
+
+      <div className="relative mt-5">
+        <p className="text-[10px] tracking-[0.2em] text-white/42">{fx.snapshotMetricsEyebrow}</p>
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:gap-3">
+          {fx.snapshotMetrics.map((m, idx) => {
+            const trendUp = m.trend.startsWith("+");
+            const numeric = parseFloat(m.value.replace(/[^0-9.]/g, ""));
+            return (
+              <motion.div
+                key={m.label}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false, amount: 0.6 }}
+                transition={{ duration: 0.45, delay: 0.1 + idx * 0.06 }}
+                className="group relative overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.035] p-3 transition-colors hover:border-sky-300/30 hover:bg-sky-300/[0.05]"
+              >
+                <div className="flex items-baseline justify-between gap-2">
+                  <p className="font-display text-2xl font-semibold tracking-[-0.03em] text-white">
+                    {Number.isFinite(numeric) ? <CountUp to={numeric} suffix={m.suffix} /> : m.value + m.suffix}
+                  </p>
+                  <span
+                    className={`text-[10px] font-semibold ${
+                      trendUp ? "text-emerald-300" : "text-sky-300"
+                    }`}
+                  >
+                    {trendUp ? "▲" : "▼"} {m.trend}
+                  </span>
+                </div>
+                <p className="mt-1 text-[11px] tracking-[0.04em] text-white/50">{m.label}</p>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="relative mt-5 rounded-2xl border border-white/[0.06] bg-black/24 p-4">
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] tracking-[0.2em] text-white/42">{fx.snapshotServicesEyebrow}</p>
+          <span className="text-[10px] text-emerald-200/70">{fx.snapshotServices.length} ok</span>
+        </div>
+        <div className="mt-3 space-y-2">
+          {fx.snapshotServices.map((svc, idx) => (
+            <motion.div
+              key={svc.name}
+              initial={{ opacity: 0, x: -8 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: false, amount: 0.6 }}
+              transition={{ duration: 0.4, delay: 0.15 + idx * 0.05 }}
+              className="grid grid-cols-[12px_1fr_auto] items-center gap-3 text-xs text-white/68"
+            >
+              <span className="h-1.5 w-1.5 animate-glowPulse rounded-full bg-emerald-300 shadow-[0_0_10px_rgba(110,231,183,0.7)]" />
+              <div className="flex items-center gap-3">
+                <span className="text-white/82">{svc.name}</span>
+                <div className="hidden h-1 flex-1 overflow-hidden rounded-full bg-white/[0.06] sm:block">
+                  <span
+                    className="block h-full rounded-full bg-gradient-to-r from-emerald-300/70 via-sky-300/80 to-violet-300/70"
+                    style={{ width: `${svc.level}%` }}
+                  />
+                </div>
+              </div>
+              <span className="font-mono text-[11px] text-white/50">{svc.value}</span>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      <div className="relative mt-5 grid gap-3 sm:grid-cols-[1fr_0.7fr]">
+        <div className="rounded-2xl border border-white/[0.06] bg-black/24 p-4">
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] tracking-[0.2em] text-white/42">{fx.snapshotTrafficEyebrow}</p>
+            <span className="text-[10px] text-sky-200/70">avg 142ms</span>
+          </div>
+          <div className="mt-3 flex h-12 items-end gap-1">
+            {[42, 58, 64, 50, 72, 88, 76, 94, 70, 82, 66, 90].map((h, i) => (
+              <span
+                key={i}
+                className="spark-bar block flex-1 rounded-t bg-gradient-to-t from-sky-400/30 via-sky-300/70 to-violet-300/80"
+                style={{ height: `${h}%`, animationDelay: `${i * 0.12}s` }}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="rounded-2xl border border-white/[0.06] bg-black/24 p-4">
+          <p className="text-[10px] tracking-[0.2em] text-white/42">{fx.snapshotDeployLabel}</p>
+          <p className="mt-2 text-sm font-semibold text-white/86">{fx.snapshotDeploy}</p>
+          <p className="mt-2 flex items-center gap-1.5 text-[11px] text-emerald-200/80">
+            <span className="h-1 w-1 rounded-full bg-emerald-300" />
+            {fx.snapshotChecks}
+          </p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 function Content() {
   const { tx } = useI18n();
   return (
@@ -1096,7 +1268,7 @@ function Content() {
           className="scroll-mt-32 grid gap-10 pt-24 pb-12 lg:grid-cols-[0.72fr_1.28fr] lg:pb-20"
           initial={{ opacity: 0, y: 34 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.28 }}
+          viewport={{ once: false, amount: 0.2, margin: "-8% 0px" }}
           transition={{ duration: 0.75, ease: "easeOut" }}
         >
           <SectionEyebrow>{tx.profile.eyebrow}</SectionEyebrow>
@@ -1118,7 +1290,7 @@ function Content() {
           className="grid gap-px overflow-hidden rounded-[1.6rem] border border-white/[0.07] bg-white/[0.07] sm:grid-cols-3"
           initial={{ opacity: 0, y: 28 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.35 }}
+          viewport={{ once: false, amount: 0.25, margin: "-8% 0px" }}
           transition={{ duration: 0.7, ease: "easeOut" }}
         >
           {tx.cards.map(([label, value], index) => (
@@ -1127,7 +1299,7 @@ function Content() {
               className="group relative overflow-hidden bg-[#050712] p-5 transition-colors hover:bg-[#0a0d1c]"
               initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.5 }}
+              viewport={{ once: false, amount: 0.4 }}
               transition={{ duration: 0.55, delay: index * 0.08, ease: "easeOut" }}
             >
               <span className="pointer-events-none absolute -left-1/2 top-0 h-full w-[200%] -translate-x-full animate-shimmer bg-[linear-gradient(115deg,transparent_30%,rgba(125,211,252,0.07)_50%,transparent_70%)] [animation-play-state:paused] group-hover:[animation-play-state:running]" />
@@ -1145,7 +1317,7 @@ function Content() {
                 key={title}
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
+                viewport={{ once: false, amount: 0.2, margin: "-8% 0px" }}
                 transition={{ duration: 0.55, delay: Math.min(index * 0.05, 0.25), ease: "easeOut" }}
               >
                 <TiltCard3D strength={6} className="h-full">
@@ -1174,7 +1346,7 @@ function Content() {
                 key={project.title}
                 initial={{ opacity: 0, y: 28 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
+                viewport={{ once: false, amount: 0.2, margin: "-8% 0px" }}
                 transition={{ duration: 0.65, delay: index * 0.06, ease: "easeOut" }}
               >
                 <TiltCard3D strength={4}>
@@ -1214,7 +1386,7 @@ function Content() {
                 className="grid gap-4 py-6 sm:grid-cols-[80px_1fr]"
                 initial={{ opacity: 0, x: -18 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.4 }}
+                viewport={{ once: false, amount: 0.3, margin: "-8% 0px" }}
                 transition={{ duration: 0.55, ease: "easeOut", delay: index * 0.08 }}
               >
                 <span className="text-sm font-semibold text-sky-200/70">0{index + 1}</span>
@@ -1242,7 +1414,7 @@ function Content() {
                   className="group grid gap-2 p-5 transition-colors hover:bg-white/[0.03] sm:grid-cols-[0.35fr_0.65fr]"
                   initial={{ opacity: 0, x: -16 }}
                   whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, amount: 0.5 }}
+                  viewport={{ once: false, amount: 0.4 }}
                   transition={{ duration: 0.5, delay: index * 0.07, ease: "easeOut" }}
                 >
                   <p className="font-semibold text-white/86 transition-colors group-hover:text-sky-200">{title}</p>
@@ -1251,43 +1423,8 @@ function Content() {
               ))}
             </div>
           </div>
-          <TiltCard3D strength={5}>
-            <motion.div
-              initial={{ opacity: 0, y: 28 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.4 }}
-              transition={{ duration: 0.7, ease: "easeOut" }}
-              className="glass-border relative h-full overflow-hidden rounded-[1.6rem] border border-white/[0.08] bg-[#050712] p-6"
-            >
-              <div className="flex items-center justify-between">
-                <p className="text-[11px] tracking-[0.18em] text-sky-200/70">{tx.focus.snapshotEyebrow}</p>
-                <span className="flex items-center gap-1.5 rounded-full border border-emerald-300/18 bg-emerald-300/[0.08] px-3 py-1 text-xs text-emerald-100">
-                  <span className="h-1.5 w-1.5 animate-glowPulse rounded-full bg-emerald-300" />
-                  {tx.focus.snapshotStatus}
-                </span>
-              </div>
-              <div className="mt-8 rounded-2xl border border-white/[0.08] bg-black/32 p-5">
-                <p className="text-sm font-mono text-white/45">{tx.focus.snapshotEndpoint}</p>
-                <p className="mt-3 font-display text-5xl font-semibold tracking-[-0.04em]">
-                  <CountUp to={tx.focus.snapshotMetric} suffix="%" />
-                </p>
-                <div className="mt-7 grid grid-cols-2 gap-3 text-sm text-white/62">
-                  {tx.focus.snapshotItems.map((item, idx) => (
-                    <motion.div
-                      key={item}
-                      initial={{ opacity: 0, y: 10 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, amount: 0.6 }}
-                      transition={{ duration: 0.4, delay: 0.3 + idx * 0.08 }}
-                      className="rounded-xl border border-white/[0.06] bg-white/[0.04] p-3 transition-colors hover:border-sky-300/30 hover:bg-sky-300/[0.05]"
-                    >
-                      {item}
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-              <p className="mt-5 text-sm leading-6 text-white/45">{tx.focus.snapshotCaption}</p>
-            </motion.div>
+          <TiltCard3D strength={4}>
+            <SystemSnapshot />
           </TiltCard3D>
         </section>
 
@@ -1295,35 +1432,33 @@ function Content() {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
+            viewport={{ once: false, amount: 0.2, margin: "-10% 0px" }}
             transition={{ duration: 0.7 }}
             className="glass-border rounded-[2rem] border border-white/[0.08] bg-[radial-gradient(circle_at_18%_20%,rgba(56,189,248,.16),transparent_28rem),radial-gradient(circle_at_84%_40%,rgba(139,92,246,.12),transparent_25rem),rgba(255,255,255,.035)] p-6 backdrop-blur-2xl sm:p-8 lg:p-10"
           >
-            <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
+            <div className="max-w-3xl">
               <SectionEyebrow>{tx.fit.eyebrow}</SectionEyebrow>
-              <div>
-                <RevealText
-                  as="h2"
-                  className="font-display text-3xl font-semibold leading-[1.04] tracking-[-0.03em] md:text-5xl"
+              <RevealText
+                as="h2"
+                className="mt-4 font-display text-2xl font-semibold leading-[1.18] tracking-[-0.02em] [text-wrap:balance] sm:text-3xl md:text-[2.6rem] md:leading-[1.12]"
+              >
+                {tx.fit.title}
+              </RevealText>
+            </div>
+            <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:mt-10 lg:grid-cols-4">
+              {tx.fit.items.map((item, idx) => (
+                <motion.div
+                  key={item}
+                  initial={{ opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: false, amount: 0.4, margin: "-5% 0px" }}
+                  transition={{ duration: 0.45, delay: idx * 0.08 }}
+                  className="group flex h-full items-start gap-3 rounded-2xl border border-white/[0.06] bg-black/22 p-4 text-sm leading-6 text-white/68 transition-all hover:-translate-y-0.5 hover:border-sky-200/30 hover:bg-black/40 hover:text-white"
                 >
-                  {tx.fit.title}
-                </RevealText>
-                <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                  {tx.fit.items.map((item, idx) => (
-                    <motion.div
-                      key={item}
-                      initial={{ opacity: 0, y: 14 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, amount: 0.4 }}
-                      transition={{ duration: 0.45, delay: idx * 0.08 }}
-                      className="group rounded-2xl bg-black/22 p-4 text-sm leading-7 text-white/58 transition-all hover:bg-black/40 hover:text-white/80"
-                    >
-                      <span className="mr-2 inline-block h-1.5 w-1.5 translate-y-[-2px] rounded-full bg-sky-300/60 transition-all group-hover:bg-sky-300 group-hover:shadow-[0_0_12px_rgba(56,189,248,0.6)]" />
-                      {item}
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
+                  <span className="mt-2 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-sky-300/60 transition-all group-hover:bg-sky-300 group-hover:shadow-[0_0_12px_rgba(56,189,248,0.6)]" />
+                  <span className="[text-wrap:pretty]">{item}</span>
+                </motion.div>
+              ))}
             </div>
           </motion.div>
         </section>
@@ -1332,7 +1467,7 @@ function Content() {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
+            viewport={{ once: false, amount: 0.2, margin: "-8% 0px" }}
             transition={{ duration: 0.75 }}
             className="glass-border grid gap-8 rounded-[2rem] border border-white/[0.09] bg-white/[0.045] p-6 shadow-[0_26px_110px_rgba(0,0,0,.32)] backdrop-blur-2xl sm:p-8 lg:grid-cols-[1fr_auto] lg:p-10"
           >
@@ -1345,23 +1480,43 @@ function Content() {
                 {tx.contact.title}
               </RevealText>
               <p className="mt-6 max-w-2xl leading-8 text-white/55">{tx.contact.desc}</p>
-              <div className="mt-8 grid gap-3 text-sm text-white/68 sm:grid-cols-2">
-                <a
-                  href="mailto:khun.chakkri@gmail.com"
-                  className="hover-lift flex items-center justify-between gap-3 rounded-2xl border border-white/[0.08] bg-black/22 p-4 transition hover:border-sky-200/40 hover:bg-sky-300/[0.06]"
-                >
-                  <span className="text-[11px] tracking-[0.18em] text-white/42">{tx.contact.emailLabel}</span>
-                  <span className="text-white/86">khun.chakkri@gmail.com</span>
-                </a>
-                <a
-                  href="https://github.com/cxndizz"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hover-lift flex items-center justify-between gap-3 rounded-2xl border border-white/[0.08] bg-black/22 p-4 transition hover:border-sky-200/40 hover:bg-sky-300/[0.06]"
-                >
-                  <span className="text-[11px] tracking-[0.18em] text-white/42">{tx.contact.githubLabel}</span>
-                  <span className="text-white/86">github.com/cxndizz</span>
-                </a>
+              <div className="mt-8 grid gap-3 text-sm text-white/68 sm:grid-cols-3">
+                {[
+                  {
+                    label: tx.contact.emailLabel,
+                    value: "khun.chakkri@gmail.com",
+                    href: "mailto:khun.chakkri@gmail.com",
+                    external: false,
+                  },
+                  {
+                    label: tx.contact.githubLabel,
+                    value: "github.com/cxndizz",
+                    href: "https://github.com/cxndizz",
+                    external: true,
+                  },
+                  {
+                    label: tx.contact.fastworkLabel,
+                    value: tx.contact.fastworkValue,
+                    href: "https://fastwork.co/user/aueasiripracha",
+                    external: true,
+                  },
+                ].map((c, idx) => (
+                  <motion.a
+                    key={c.label}
+                    href={c.href}
+                    target={c.external ? "_blank" : undefined}
+                    rel={c.external ? "noreferrer" : undefined}
+                    initial={{ opacity: 0, y: 14 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: false, amount: 0.4 }}
+                    transition={{ duration: 0.45, delay: 0.05 + idx * 0.07 }}
+                    whileHover={{ y: -4 }}
+                    className="flex flex-col gap-2 rounded-2xl border border-white/[0.08] bg-black/22 p-4 transition-colors hover:border-sky-200/40 hover:bg-sky-300/[0.06]"
+                  >
+                    <span className="text-[11px] tracking-[0.18em] text-white/42">{c.label}</span>
+                    <span className="break-all text-sm text-white/86">{c.value}</span>
+                  </motion.a>
+                ))}
               </div>
             </div>
             <div className="flex flex-col justify-end gap-3 sm:flex-row lg:flex-col">
