@@ -9,9 +9,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Freelance Programmer Portfolio",
+  title: "Chakkria | Full Stack Developer Portfolio",
   description:
-    "Premium cinematic Web3-inspired portfolio for a freelance programmer.",
+    "พอร์ตโฟลิโอ Full Stack Developer ที่เน้นการพัฒนาเว็บแอป ระบบ backend และ product engineering ที่ใช้งานได้จริง",
 };
 
 export default function RootLayout({
@@ -20,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="th">
       <body className={`${inter.variable} bg-void font-sans text-white`}>
         {children}
       </body>
