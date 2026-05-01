@@ -1,9 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
 import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  AnimatePresence,
   motion,
+  useInView,
+  useMotionValue,
   useReducedMotion,
   useScroll,
   useSpring,
@@ -11,102 +21,607 @@ import {
 } from "framer-motion";
 import moon from "../img/moon.webp";
 
-const navItems = [
-  { label: "เกี่ยวกับฉัน", href: "#profile" },
-  { label: "บริการ", href: "#services" },
-  { label: "ผลงาน", href: "#work" },
-  { label: "กระบวนการ", href: "#process" },
-  { label: "โฟกัสปัจจุบัน", href: "#focus" },
-];
+type Lang = "th" | "en";
 
-const services = [
-  {
-    title: "ระบบ Full Stack Web App",
-    copy: "พัฒนาเว็บแอปพลิเคชันแบบครบวงจร สำหรับงาน booking, commerce และเครื่องมือภายในองค์กร ตั้งแต่ frontend จนถึง backend และ database",
+const dict = {
+  th: {
+    nav: {
+      items: [
+        { label: "เกี่ยวกับ", href: "#profile" },
+        { label: "บริการ", href: "#services" },
+        { label: "ผลงาน", href: "#work" },
+        { label: "วิธีทำงาน", href: "#process" },
+        { label: "ตอนนี้", href: "#focus" },
+      ],
+      cta: "ติดต่อ",
+    },
+    hero: {
+      badge: "เปิดรับงานฟรีแลนซ์",
+      title: "ทำเว็บที่ใช้ได้จริง ไม่ใช่แค่ดูดี",
+      sub: "Full Stack Dev รับทำเว็บแอป API และระบบ Database แบบที่เอาขึ้น production ได้เลย ไม่ต้องเริ่มใหม่",
+      cta1: "เริ่มคุยกัน",
+      cta2: "ดูงานก่อน",
+      bookingLabel: "ตอนนี้ว่างรับงาน",
+      bookingTitle: "Full Stack · Backend · ระบบ Database",
+      stat1: "25+",
+      stat1Label: "เครื่องมือที่ใช้",
+      stat2: "1:1",
+      stat2Label: "คุยกับคนเขียนโค้ด",
+    },
+    hud: {
+      eyebrow: "สถานะระบบ",
+      live: "ออนไลน์",
+      title: "ทุกชิ้นต่อกันเป็นชิ้นเดียว",
+      desc: "UI · API · Database · Automation ทำงานพร้อมกัน",
+      tags: ["UI", "API", "DB"],
+      meters: [
+        ["Frontend", "96%"],
+        ["Backend", "92%"],
+        ["Database", "88%"],
+        ["DevOps", "74%"],
+      ],
+      queueEyebrow: "ลำดับงาน",
+      queue: [
+        ["01", "เคลียร์ขอบเขต"],
+        ["02", "ทำ Prototype"],
+        ["03", "ส่งขึ้น Production"],
+      ],
+      signal: "สัญญาณ",
+      stable: "เสถียร",
+    },
+    profile: {
+      eyebrow: "เกี่ยวกับฉัน",
+      title: "ทำเว็บที่เข้าใจทั้งฝั่งคนใช้ และฝั่งระบบ",
+      p1: "งานของผมอยู่ตรงกลางระหว่าง UI ที่ใช้ง่าย, API ที่ไม่พังบ่อย และฐานข้อมูลที่รองรับการโตได้",
+      p2: "ตอนนี้สนใจ AI, system design, Kubernetes ปกติเขียน Next.js, Spring Boot, Node.js เลือกเครื่องมือตามงาน ไม่ใช่ตามเทรนด์",
+    },
+    cards: [
+      ["งานหลัก", "เว็บแอป · Backend · Database"],
+      ["วิธีทำงาน", "ตรงไปตรงมา · มีเอกสาร · async ได้"],
+      ["จุดแข็ง", "Frontend ละเอียด · Backend เข้าใจธุรกิจ"],
+    ],
+    services: {
+      eyebrow: "บริการ",
+      title: "งานที่รับทำ และที่ทำมาหลายรอบจนคุ้นมือ",
+      items: [
+        ["เว็บแอป Full Stack", "ทำเว็บจองคิว ขายของออนไลน์ หรือเครื่องมือใช้ในออฟฟิศ ตั้งแต่ออกแบบ UI จนถึงดูแล server"],
+        ["Backend & API", "เขียน API ที่อ่านโค้ดง่าย แก้ไขสบาย ใช้ Spring Boot, Node.js, NestJS หรือ Express ตามงาน"],
+        ["ระบบฐานข้อมูล", "ออกแบบ schema เขียน query ทำ index ให้รับงานจริงไหว ทั้ง PostgreSQL, Oracle, MySQL, MongoDB"],
+        ["Frontend ที่ลื่น", "หน้าจอที่ตอบสนองเร็ว ใช้ Next.js + TypeScript + Tailwind ทำให้รู้สึกว่าเป็นแอปจริง ๆ"],
+        ["เชื่อม LINE", "ทำ LINE OA, webhook, แจ้งเตือน หรือ chatbot สำหรับร้านค้าและทีมภายใน"],
+        ["พร้อมขึ้น Production", "Docker, Kubernetes, Nginx, CI/CD ทำให้ deploy ทีไม่ลุ้นว่าเว็บจะล่มหรือเปล่า"],
+      ],
+    },
+    work: {
+      eyebrow: "ผลงาน",
+      title: "ตัวอย่างงานที่เคยทำ และยังใช้งานอยู่จริง",
+      items: [
+        {
+          title: "ระบบจองคิวออนไลน์",
+          type: "Full Stack",
+          metric: "Next.js + Spring Boot",
+          copy: "ระบบจองออนไลน์พร้อมแจ้งเตือนผ่าน LINE หน้าแอดมินใช้ง่าย รองรับลูกค้าหลายคนพร้อมกัน",
+        },
+        {
+          title: "ร้านค้าออนไลน์",
+          type: "E-Commerce",
+          metric: "Node.js + PostgreSQL",
+          copy: "ระบบขายของ ตะกร้า ชำระเงิน และแดชบอร์ด เพิ่มสินค้าหรือ category ได้เองโดยไม่ต้องเรียก dev",
+        },
+        {
+          title: "เครื่องมือในออฟฟิศ",
+          type: "Internal Tool",
+          metric: "Laravel + Oracle",
+          copy: "ระบบเอกสารภายในที่เชื่อม Oracle เก่า ๆ ลดเวลาคีย์ข้อมูลซ้ำได้เป็นชั่วโมงต่อวัน",
+        },
+      ],
+    },
+    process: {
+      eyebrow: "วิธีทำงาน",
+      title: "ส่งงานทีละนิด คุยกันตรง ๆ ไม่ทำซับซ้อนเกินจำเป็น",
+      steps: [
+        "คุยให้เข้าใจตรงกันก่อน ตัดส่วนที่ยังไม่ชัดออกก่อนเขียนโค้ด",
+        "ทำ flow หลักให้ใช้ได้จริงก่อน แล้วค่อยเก็บรายละเอียดทีหลัง",
+        "ส่งงานเป็นรอบสั้น ๆ พร้อม note อธิบาย ใช้งานได้ทันทีไม่ต้องรอนาน",
+      ],
+    },
+    stack: {
+      eyebrow: "Tech Stack",
+      title: "เครื่องมือที่ใช้บ่อย เลือกเพราะใช้ได้จริง",
+    },
+    focus: {
+      eyebrow: "ตอนนี้",
+      title: "เรื่องที่กำลังเล่น ๆ และเรียนรู้เพิ่ม",
+      items: [
+        ["Full Stack Workflow", "หาทาง ship งานเร็วขึ้น โดยที่คุณภาพไม่ตก"],
+        ["Backend & Database", "ลองโครงสร้างใหม่ ๆ ที่ทำให้ระบบโตได้โดยไม่ต้องรื้อ"],
+        ["AI & Automation", "เอา AI มาช่วยงานจริง เช่น สรุปเอกสาร generate code ทำ classification"],
+        ["LINE & Integration", "เชื่อม LINE และระบบอื่นให้ตอบ user ได้เร็วและ automate งานซ้ำ"],
+      ],
+      snapshotEyebrow: "ภาพรวมระบบ",
+      snapshotStatus: "Stable",
+      snapshotEndpoint: "api.cxndizz.dev",
+      snapshotMetric: 99.8,
+      snapshotItems: ["API Health", "DB Status", "Cache Layer", "Background Jobs"],
+      snapshotCaption: "ตัวอย่าง dashboard แสดงสถานะ API กับฐานข้อมูลแบบ real-time",
+    },
+    fit: {
+      eyebrow: "เหมาะกับใคร",
+      title: "เหมาะกับเจ้าของธุรกิจและทีมที่อยากทำของจริง ไม่ใช่แค่ wireframe",
+      items: [
+        "มีไอเดียอยู่ในหัว แต่ยังไม่รู้จะเริ่มยังไง",
+        "อยากได้คนทำทั้ง frontend และ backend ในคนเดียว",
+        "อยากได้ระบบที่เชื่อม LINE หรือ automate งานซ้ำ ๆ",
+        "เน้นใช้งานได้จริง ไม่ว่ามือถือหรือคอม",
+      ],
+    },
+    contact: {
+      eyebrow: "ติดต่อ",
+      title: "ส่งโจทย์มาก่อน เริ่มจากตรงนั้น",
+      desc: "บอกมาว่าจะทำอะไร ตอนนี้อยู่จุดไหน และเรื่องไหนกังวลที่สุด ผมจะช่วยดูให้ว่าควรเริ่มจากตรงไหน",
+      cta1: "ส่งอีเมล",
+      cta2: "ดูผลงานเพิ่ม",
+      emailLabel: "อีเมล",
+      githubLabel: "GitHub",
+    },
+    footer: {
+      tagline: "Full Stack Developer รับทำเว็บแอป Backend และระบบฐานข้อมูล",
+      copy: "© 2026 CXN. สงวนลิขสิทธิ์",
+      built: "ออกแบบให้ใช้ได้ทุกอุปกรณ์",
+      links: [
+        ["เกี่ยวกับ", "#profile"],
+        ["บริการ", "#services"],
+        ["ผลงาน", "#work"],
+        ["ติดต่อ", "#contact"],
+      ],
+    },
   },
-  {
-    title: "Backend & API Development",
-    copy: "ออกแบบและสร้าง API ที่บำรุงรักษาง่าย ด้วย Spring Boot, Node.js, NestJS และ Express เน้นโครงสร้างที่สะอาดและขยายตัวได้",
+  en: {
+    nav: {
+      items: [
+        { label: "About", href: "#profile" },
+        { label: "Services", href: "#services" },
+        { label: "Work", href: "#work" },
+        { label: "Process", href: "#process" },
+        { label: "Now", href: "#focus" },
+      ],
+      cta: "Contact",
+    },
+    hero: {
+      badge: "Open for freelance",
+      title: "I build web apps that actually ship.",
+      sub: "Full stack developer making web apps, APIs, and databases — the kind that hold up in production, not just in demo.",
+      cta1: "Let's talk",
+      cta2: "See work",
+      bookingLabel: "Available now",
+      bookingTitle: "Full Stack · Backend · Database",
+      stat1: "25+",
+      stat1Label: "Tools I use",
+      stat2: "1:1",
+      stat2Label: "No middlemen",
+    },
+    hud: {
+      eyebrow: "System status",
+      live: "Online",
+      title: "Everything wired as one",
+      desc: "UI · API · Database · Automation moving together",
+      tags: ["UI", "API", "DB"],
+      meters: [
+        ["Frontend", "96%"],
+        ["Backend", "92%"],
+        ["Database", "88%"],
+        ["DevOps", "74%"],
+      ],
+      queueEyebrow: "Queue",
+      queue: [
+        ["01", "Scope locked"],
+        ["02", "Prototype live"],
+        ["03", "Ready to ship"],
+      ],
+      signal: "Signal",
+      stable: "Stable",
+    },
+    profile: {
+      eyebrow: "About",
+      title: "I build web apps that respect both users and the system underneath.",
+      p1: "My day-to-day sits between product design and engineering — clean UI, APIs that don't break, databases that grow without rewrites.",
+      p2: "Currently into AI, system design, and Kubernetes. Default stack: Next.js, Spring Boot, Node.js. I pick tools by fit, not hype.",
+    },
+    cards: [
+      ["What I build", "Web apps · Backend · Database"],
+      ["How I work", "Direct · documented · async-friendly"],
+      ["Where I'm strong", "Frontend polish · backend judgment"],
+    ],
+    services: {
+      eyebrow: "Services",
+      title: "Work I take on, and have shipped enough times to know it.",
+      items: [
+        ["Full Stack Web Apps", "Booking systems, online stores, internal tools — from UI down to the server."],
+        ["Backend & APIs", "APIs that read clean and extend easily. Spring Boot, Node.js, NestJS, Express depending on the job."],
+        ["Database Systems", "Schema design, queries, indexes that hold up in production — PostgreSQL, Oracle, MySQL, MongoDB."],
+        ["Smooth Frontends", "Fast, responsive UIs that feel like a real app — Next.js, TypeScript, Tailwind."],
+        ["LINE Integrations", "LINE OA, webhooks, alerts, chatbots — for stores and internal teams."],
+        ["Production Ready", "Docker, Kubernetes, Nginx, CI/CD. Deploy without crossing fingers."],
+      ],
+    },
+    work: {
+      eyebrow: "Work",
+      title: "Real builds that are still running today.",
+      items: [
+        {
+          title: "Online Booking System",
+          type: "Full Stack",
+          metric: "Next.js + Spring Boot",
+          copy: "Online booking with LINE alerts. Admin panel non-engineers can actually use, handles concurrent customers.",
+        },
+        {
+          title: "Online Store",
+          type: "E-Commerce",
+          metric: "Node.js + PostgreSQL",
+          copy: "Cart, checkout, dashboard. Add products and categories without calling the dev.",
+        },
+        {
+          title: "Internal Office Tool",
+          type: "Internal Tool",
+          metric: "Laravel + Oracle",
+          copy: "Document workflow on top of legacy Oracle. Cuts hours of manual entry per day.",
+        },
+      ],
+    },
+    process: {
+      eyebrow: "Process",
+      title: "Ship in small steps. Talk straight. Skip needless complexity.",
+      steps: [
+        "Get aligned first. Cut anything that isn't clear before code starts.",
+        "Build the main flow first. Polish edges and states once it works.",
+        "Hand off in short rounds with notes. Production-ready from day one.",
+      ],
+    },
+    stack: {
+      eyebrow: "Tech Stack",
+      title: "Tools I actually reach for, picked by fit not novelty.",
+    },
+    focus: {
+      eyebrow: "Now",
+      title: "What I'm playing with and learning on the side.",
+      items: [
+        ["Full Stack Workflow", "Shipping faster without losing quality."],
+        ["Backend & Database", "Trying structures that scale without rewrites."],
+        ["AI & Automation", "Real uses for AI — summaries, code gen, classification."],
+        ["LINE & Integration", "Connecting LINE and other services for faster response."],
+      ],
+      snapshotEyebrow: "System overview",
+      snapshotStatus: "Stable",
+      snapshotEndpoint: "api.cxndizz.dev",
+      snapshotMetric: 99.8,
+      snapshotItems: ["API Health", "DB Status", "Cache Layer", "Background Jobs"],
+      snapshotCaption: "Sample dashboard showing API and database health in real time.",
+    },
+    fit: {
+      eyebrow: "Who this is for",
+      title: "Founders and teams who want a builder — not a handoff chain.",
+      items: [
+        "You have an idea but aren't sure where to start",
+        "You want one person who handles frontend AND backend",
+        "You need LINE integration or automation for repetitive work",
+        "You care about both mobile and desktop quality",
+      ],
+    },
+    contact: {
+      eyebrow: "Contact",
+      title: "Send the brief. We'll start from there.",
+      desc: "Tell me what you're building, where it stands, and what worries you most. I'll help figure out where to begin.",
+      cta1: "Send email",
+      cta2: "More work",
+      emailLabel: "Email",
+      githubLabel: "GitHub",
+    },
+    footer: {
+      tagline: "Full stack developer building web apps, backend, and database systems.",
+      copy: "© 2026 CXN. All rights reserved.",
+      built: "Built to feel right on every device.",
+      links: [
+        ["About", "#profile"],
+        ["Services", "#services"],
+        ["Work", "#work"],
+        ["Contact", "#contact"],
+      ],
+    },
   },
-  {
-    title: "Database & ระบบจัดการข้อมูล",
-    copy: "ออกแบบฐานข้อมูลที่รองรับการใช้งานจริง ด้วย PostgreSQL, Oracle, MySQL, MongoDB พร้อม Prisma ORM และระบบ cache ด้วย Redis",
-  },
-  {
-    title: "Frontend ที่เน้น UX จริงจัง",
-    copy: "สร้างหน้าจอที่ตอบสนองดีและใช้งานสะดวก ด้วย Next.js, React, TypeScript, Tailwind CSS และ Bootstrap",
-  },
-  {
-    title: "LINE Integration & Automation",
-    copy: "เชื่อมระบบเข้ากับ LINE และสร้าง workflow อัตโนมัติเพื่อลดงานซ้ำซ้อนภายในองค์กร พร้อมการแจ้งเตือนแบบ real-time",
-  },
-  {
-    title: "Production-Ready Architecture",
-    copy: "วางสถาปัตยกรรมระบบที่พร้อมขึ้น production ด้วย Docker, Kubernetes, Nginx รวมถึงการนำ AI เข้ามาใช้ในงานจริง",
-  },
-];
+};
 
-const projects = [
-  {
-    title: "ระบบจองคิวออนไลน์",
-    type: "Full Stack Web App",
-    metric: "Next.js + Spring Boot",
-    copy: "ระบบจองคิวและจัดตารางเวลาแบบครบวงจร พร้อมการแจ้งเตือนผ่าน LINE และหน้า admin ที่จัดการง่าย รองรับการใช้งานพร้อมกันจำนวนมาก",
-  },
-  {
-    title: "ระบบ E-Commerce",
-    type: "Backend + Frontend",
-    metric: "Node.js + PostgreSQL",
-    copy: "เว็บแอปขายของออนไลน์ พร้อมระบบสมาชิก ตะกร้าสินค้า การชำระเงิน และแดชบอร์ดผู้ดูแลระบบที่ยืดหยุ่นต่อการเพิ่มฟีเจอร์ใหม่",
-  },
-  {
-    title: "เครื่องมือภายในองค์กร",
-    type: "Internal Tool",
-    metric: "Laravel + Oracle",
-    copy: "ระบบจัดการงานเอกสารและข้อมูลภายในองค์กร เชื่อมกับ Oracle Database และมีสคริปต์ automation ที่ช่วยให้ทีมงานลดเวลาทำงานซ้ำได้จริง",
-  },
-];
+type DictShape = typeof dict.th;
 
-const process = [
-  "ทำความเข้าใจโจทย์และเป้าหมายของระบบ ตัดส่วนที่ยังไม่ชัดเจนออกก่อนเริ่มเขียนโค้ดจริง",
-  "สร้าง flow หลักให้ใช้งานได้ก่อน แล้วค่อยเก็บรายละเอียด edge case รวมถึงการเชื่อมต่อกับระบบอื่น",
-  "ส่งงานเป็นรอบสั้น ๆ พร้อมเอกสารที่ชัดเจน และทดสอบให้พร้อมขึ้น production ได้ทันที",
-];
+const I18nCtx = createContext<{
+  lang: Lang;
+  setLang: (l: Lang) => void;
+  tx: DictShape;
+}>(null!);
 
-const stack = [
-  "Next.js",
-  "React",
-  "TypeScript",
-  "JavaScript",
-  "Tailwind CSS",
-  "Bootstrap",
-  "Java",
-  "Spring Boot",
-  "Node.js",
-  "Express",
-  "NestJS",
-  "PHP",
-  "Laravel",
-  "PostgreSQL",
-  "Oracle",
-  "MySQL",
-  "MongoDB",
-  "Redis",
-  "Prisma",
-  "Docker",
-  "Kubernetes",
-  "Git",
-  "GitLab",
-  "Nginx",
-  "PowerShell",
-];
+const useI18n = () => useContext(I18nCtx);
 
-const capabilityRows = [
-  ["Full Stack Workflow", "พัฒนาทั้งฝั่ง frontend และ backend ให้สอดคล้องกัน เพื่อสร้าง product flow ที่ดีขึ้นและส่งมอบเร็ว"],
-  ["Backend & Database", "ปรับปรุงสถาปัตยกรรมรอบ ๆ บริการ backend และฐานข้อมูลให้เสถียร ขยายตัวได้ และดูแลรักษาง่าย"],
-  ["AI & Automation", "ทดลองใช้ AI และ automation ในโปรเจกต์จริง เพื่อช่วยให้ทีมงานทำงานเร็วขึ้นและลดงานซ้ำซ้อน"],
-  ["LINE & Integration", "เชื่อมระบบเข้ากับ LINE OA และบริการภายนอก เพื่อตอบสนองผู้ใช้แบบทันทีและทำงานอัตโนมัติ"],
-];
+function useLanguage(): [Lang, (l: Lang) => void] {
+  const [lang, setLang] = useState<Lang>("th");
+  useEffect(() => {
+    const stored = (typeof window !== "undefined" && (window.localStorage.getItem("lang") as Lang | null)) ?? null;
+    if (stored === "th" || stored === "en") setLang(stored);
+  }, []);
+  useEffect(() => {
+    if (typeof document !== "undefined") document.documentElement.lang = lang;
+    if (typeof window !== "undefined") window.localStorage.setItem("lang", lang);
+  }, [lang]);
+  return [lang, setLang];
+}
+
+function Spotlight() {
+  const ref = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (reduceMotion) return;
+    const el = ref.current;
+    if (!el) return;
+    let raf = 0;
+    const onMove = (e: MouseEvent) => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        el.style.setProperty("--mx", `${e.clientX}px`);
+        el.style.setProperty("--my", `${e.clientY}px`);
+      });
+    };
+    window.addEventListener("mousemove", onMove);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("mousemove", onMove);
+    };
+  }, [reduceMotion]);
+
+  return (
+    <div
+      ref={ref}
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-0 z-[5] hidden lg:block"
+      style={{
+        background:
+          "radial-gradient(620px circle at var(--mx, 50%) var(--my, 50%), rgba(56,189,248,0.07), rgba(139,92,246,0.04) 30%, transparent 60%)",
+        transition: "background 0.4s ease",
+      }}
+    />
+  );
+}
+
+function FloatingOrbs() {
+  return (
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="absolute -left-20 top-24 h-72 w-72 animate-floatXY rounded-full bg-sky-400/10 blur-3xl" />
+      <div className="absolute right-[-10%] top-[40%] h-80 w-80 animate-floatY rounded-full bg-violet-500/10 blur-3xl [animation-delay:-3s]" />
+      <div className="absolute bottom-10 left-[30%] h-60 w-60 animate-floatXY rounded-full bg-fuchsia-400/[0.06] blur-3xl [animation-delay:-6s]" />
+    </div>
+  );
+}
+
+function MagneticLink({
+  href,
+  children,
+  className = "",
+  strength = 14,
+  external = false,
+}: {
+  href: string;
+  children: React.ReactNode;
+  className?: string;
+  strength?: number;
+  external?: boolean;
+}) {
+  const ref = useRef<HTMLAnchorElement>(null);
+  const reduceMotion = useReducedMotion();
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const sx = useSpring(x, { stiffness: 220, damping: 18, mass: 0.4 });
+  const sy = useSpring(y, { stiffness: 220, damping: 18, mass: 0.4 });
+
+  function onMove(e: React.MouseEvent<HTMLAnchorElement>) {
+    if (reduceMotion) return;
+    const r = ref.current!.getBoundingClientRect();
+    const cx = e.clientX - (r.left + r.width / 2);
+    const cy = e.clientY - (r.top + r.height / 2);
+    x.set((cx / r.width) * strength * 2);
+    y.set((cy / r.height) * strength * 2);
+  }
+  function onLeave() {
+    x.set(0);
+    y.set(0);
+  }
+
+  return (
+    <motion.a
+      ref={ref}
+      href={href}
+      target={external ? "_blank" : undefined}
+      rel={external ? "noreferrer" : undefined}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      style={{ x: sx, y: sy }}
+      className={className}
+    >
+      {children}
+    </motion.a>
+  );
+}
+
+function TiltCard3D({
+  children,
+  className = "",
+  strength = 8,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  strength?: number;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const reduceMotion = useReducedMotion();
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const sx = useSpring(x, { stiffness: 150, damping: 20 });
+  const sy = useSpring(y, { stiffness: 150, damping: 20 });
+  const rotateX = useTransform(sy, [-0.5, 0.5], [strength, -strength]);
+  const rotateY = useTransform(sx, [-0.5, 0.5], [-strength, strength]);
+
+  function onMove(e: React.MouseEvent<HTMLDivElement>) {
+    if (reduceMotion) return;
+    const r = ref.current!.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - 0.5;
+    const py = (e.clientY - r.top) / r.height - 0.5;
+    x.set(px);
+    y.set(py);
+  }
+  function onLeave() {
+    x.set(0);
+    y.set(0);
+  }
+
+  return (
+    <div ref={ref} onMouseMove={onMove} onMouseLeave={onLeave} className={`tilt-3d ${className}`}>
+      <motion.div
+        className="tilt-3d-inner h-full w-full"
+        style={{ rotateX, rotateY }}
+        transition={{ type: "spring", stiffness: 150, damping: 18 }}
+      >
+        {children}
+      </motion.div>
+    </div>
+  );
+}
+
+function Marquee({
+  items,
+  reverse = false,
+}: {
+  items: readonly string[];
+  reverse?: boolean;
+}) {
+  const doubled = useMemo(() => [...items, ...items], [items]);
+  return (
+    <div className="marquee-mask group relative overflow-hidden">
+      <div
+        className={`flex w-max gap-3 group-hover:[animation-play-state:paused] ${
+          reverse ? "animate-marqueeReverse" : "animate-marquee"
+        }`}
+      >
+        {doubled.map((item, i) => (
+          <span
+            key={`${item}-${i}`}
+            className="rounded-full border border-white/[0.08] bg-white/[0.04] px-4 py-2 text-sm text-white/72 backdrop-blur-xl transition-colors hover:border-sky-300/40 hover:bg-sky-300/[0.08] hover:text-white"
+          >
+            {item}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CountUp({ to, suffix = "", duration = 1800 }: { to: number; suffix?: string; duration?: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.6 });
+  const [val, setVal] = useState(0);
+  const reduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (!inView) return;
+    if (reduceMotion) {
+      setVal(to);
+      return;
+    }
+    const start = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setVal(to * eased);
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [inView, to, duration, reduceMotion]);
+
+  return (
+    <span ref={ref}>
+      {val.toFixed(1)}
+      {suffix}
+    </span>
+  );
+}
+
+function RevealText({
+  children,
+  delay = 0,
+  className = "",
+  as: As = "span",
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+  as?: "span" | "div" | "h1" | "h2" | "h3" | "p";
+}) {
+  const Tag = motion[As as keyof typeof motion] as React.ElementType;
+  return (
+    <Tag
+      className={className}
+      initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
+      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.8, ease: [0.2, 0.8, 0.2, 1], delay }}
+    >
+      {children}
+    </Tag>
+  );
+}
+
+function LanguageToggle({
+  lang,
+  setLang,
+  compact = false,
+}: {
+  lang: Lang;
+  setLang: (l: Lang) => void;
+  compact?: boolean;
+}) {
+  const options: Lang[] = ["th", "en"];
+  return (
+    <div
+      role="group"
+      aria-label="Language"
+      className={`relative flex items-center rounded-full border border-white/[0.09] bg-black/30 p-1 backdrop-blur-2xl ${
+        compact ? "text-[10px]" : "text-[11px]"
+      }`}
+    >
+      {options.map((opt) => {
+        const active = lang === opt;
+        return (
+          <button
+            key={opt}
+            type="button"
+            onClick={() => setLang(opt)}
+            aria-pressed={active}
+            className={`relative z-10 px-3 py-1.5 font-semibold uppercase tracking-[0.2em] transition-colors ${
+              active ? "text-black" : "text-white/55 hover:text-white"
+            }`}
+          >
+            {active && (
+              <motion.span
+                layoutId="lang-pill"
+                className="absolute inset-0 -z-10 rounded-full bg-gradient-to-r from-sky-200 to-violet-200 shadow-[0_0_24px_rgba(56,189,248,0.35)]"
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              />
+            )}
+            {opt.toUpperCase()}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 function Stars() {
   return (
@@ -141,12 +656,7 @@ function NodeNetwork({ opacity }: { opacity: any }) {
         strokeDasharray="8 22"
         initial={{ pathLength: 0 }}
         animate={{ pathLength: 1 }}
-        transition={{
-          duration: 8,
-          ease: "easeInOut",
-          repeat: Infinity,
-          repeatType: "reverse",
-        }}
+        transition={{ duration: 8, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" }}
       />
       {[
         [82, 650],
@@ -188,7 +698,38 @@ function GlassCard({
   );
 }
 
+const stack = [
+  "Next.js",
+  "React",
+  "TypeScript",
+  "JavaScript",
+  "Tailwind CSS",
+  "Bootstrap",
+  "Java",
+  "Spring Boot",
+  "Node.js",
+  "Express",
+  "NestJS",
+  "PHP",
+  "Laravel",
+  "PostgreSQL",
+  "Oracle",
+  "MySQL",
+  "MongoDB",
+  "Redis",
+  "Prisma",
+  "Docker",
+  "Kubernetes",
+  "Git",
+  "GitLab",
+  "Nginx",
+  "PowerShell",
+] as const;
+
 export default function Home() {
+  const [lang, setLang] = useLanguage();
+  const tx = dict[lang];
+
   const heroRef = useRef<HTMLElement>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [heroDistance, setHeroDistance] = useState(1600);
@@ -233,133 +774,195 @@ export default function Home() {
   const stateScale = useTransform(smoothScrollY, [heroDistance * 0.24, heroDistance * 0.5], [0.96, 1]);
 
   return (
-    <main className="relative min-h-screen overflow-x-clip bg-void text-white">
-      <FloatingNav />
+    <I18nCtx.Provider value={{ lang, setLang, tx }}>
+      <main className="relative min-h-screen overflow-x-clip bg-void text-white">
+        <Spotlight />
+        <FloatingNav />
 
-      <section ref={heroRef} className="relative h-[240vh] md:h-[300vh]">
-        <div className="sticky top-0 h-screen overflow-hidden">
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,#02030a_0%,#040713_44%,#02030a_100%)]" />
-          <Stars />
-          <div className="absolute inset-0 opacity-[0.025] [background-image:linear-gradient(rgba(255,255,255,.7)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.7)_1px,transparent_1px)] [background-size:84px_84px]" />
-          <NodeNetwork opacity={reduceMotion ? 0.12 : networkOpacity} />
+        <section ref={heroRef} className="relative h-[240vh] md:h-[300vh]">
+          <div className="sticky top-0 h-screen overflow-hidden">
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,#02030a_0%,#040713_44%,#02030a_100%)]" />
+            <Stars />
+            <div className="absolute inset-0 opacity-[0.025] [background-image:linear-gradient(rgba(255,255,255,.7)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.7)_1px,transparent_1px)] [background-size:84px_84px]" />
+            <NodeNetwork opacity={reduceMotion ? 0.12 : networkOpacity} />
 
-          <motion.div
-            aria-hidden="true"
-            className="absolute left-1/2 top-[58%] z-10 h-[54vw] max-h-[700px] min-h-[340px] w-[104vw] max-w-[1320px] -translate-x-1/2 rounded-[50%] border border-sky-200/[0.08] opacity-0"
-            style={{ opacity: reduceMotion ? 0.14 : networkOpacity }}
-          >
-            <div className="absolute inset-x-[10%] inset-y-[24%] animate-orbit rounded-[50%] border border-violet-300/[0.1]" />
-            <div className="absolute inset-x-[18%] inset-y-[33%] animate-orbit rounded-[50%] border border-sky-300/[0.12] [animation-duration:48s]" />
-          </motion.div>
+            <motion.div
+              aria-hidden="true"
+              className="absolute left-1/2 top-[58%] z-10 h-[54vw] max-h-[700px] min-h-[340px] w-[104vw] max-w-[1320px] -translate-x-1/2 rounded-[50%] border border-sky-200/[0.08] opacity-0"
+              style={{ opacity: reduceMotion ? 0.14 : networkOpacity }}
+            >
+              <div className="absolute inset-x-[10%] inset-y-[24%] animate-orbit rounded-[50%] border border-violet-300/[0.1]" />
+              <div className="absolute inset-x-[18%] inset-y-[33%] animate-orbit rounded-[50%] border border-sky-300/[0.12] [animation-duration:48s]" />
+            </motion.div>
 
-          <motion.div
-            className="moon-banner-layer absolute inset-0 z-10 transform-gpu will-change-transform"
-            style={{
-              y: reduceMotion ? (isMobile ? "62vh" : "68vh") : moonY,
-              scale: reduceMotion ? 1.04 : moonScale,
-            }}
-          >
-            <div className="absolute inset-x-[-14%] bottom-[-10%] h-[52%] bg-sky-300/[0.1] blur-3xl" />
-            <div className="absolute inset-x-[-16%] bottom-[4%] h-[42%] bg-violet-500/[0.07] blur-3xl" />
-            <Image
-              src={moon}
-              alt="ภาพดวงจันทร์ลอยขึ้นเหนือพื้นที่อวกาศสีดำ"
-              priority
-              fill
-              sizes="100vw"
-              className="relative object-cover object-bottom opacity-100 brightness-[1.18] contrast-[1.08] drop-shadow-[0_-28px_96px_rgba(56,189,248,0.18)]"
-            />
-          </motion.div>
+            <motion.div
+              className="moon-banner-layer absolute inset-0 z-10 transform-gpu will-change-transform"
+              style={{
+                y: reduceMotion ? (isMobile ? "62vh" : "68vh") : moonY,
+                scale: reduceMotion ? 1.04 : moonScale,
+              }}
+            >
+              <div className="absolute inset-x-[-14%] bottom-[-10%] h-[52%] bg-sky-300/[0.1] blur-3xl" />
+              <div className="absolute inset-x-[-16%] bottom-[4%] h-[42%] bg-violet-500/[0.07] blur-3xl" />
+              <Image
+                src={moon}
+                alt=""
+                priority
+                fill
+                sizes="100vw"
+                className="relative object-cover object-bottom opacity-100 brightness-[1.18] contrast-[1.08] drop-shadow-[0_-28px_96px_rgba(56,189,248,0.18)]"
+              />
+            </motion.div>
 
-          <div className="pointer-events-none absolute inset-0 z-20 bg-[linear-gradient(180deg,#02030a_0%,rgba(2,3,10,.94)_17%,rgba(2,3,10,.76)_42%,rgba(2,3,10,.08)_76%,rgba(2,3,10,.5)_100%)]" />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[32vh] bg-[linear-gradient(180deg,transparent_0%,rgba(2,3,10,.3)_36%,#02030a_100%)]" />
+            <div className="pointer-events-none absolute inset-0 z-20 bg-[linear-gradient(180deg,#02030a_0%,rgba(2,3,10,.94)_17%,rgba(2,3,10,.76)_42%,rgba(2,3,10,.08)_76%,rgba(2,3,10,.5)_100%)]" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[32vh] bg-[linear-gradient(180deg,transparent_0%,rgba(2,3,10,.3)_36%,#02030a_100%)]" />
 
-          <motion.div
-            className="relative z-30 mx-auto flex h-full max-w-7xl transform-gpu items-center px-5 pt-24 will-change-transform sm:px-8 lg:pt-20"
-            style={{
-              y: reduceMotion ? 0 : heroTextY,
-              opacity: reduceMotion ? 1 : heroTextOpacity,
-            }}
-          >
-            <div className="grid w-full gap-8 lg:grid-cols-[minmax(0,1fr)_330px] lg:items-end xl:grid-cols-[minmax(0,1fr)_360px]">
-              <div className="max-w-4xl">
-                <div className="mb-7 inline-flex items-center gap-3 rounded-full border border-white/[0.08] bg-black/30 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.28em] text-sky-100/90 shadow-[0_18px_70px_rgba(0,0,0,.28)] backdrop-blur-2xl">
-                  <span className="h-1.5 w-1.5 rounded-full bg-sky-300 shadow-[0_0_18px_rgba(56,189,248,.95)]" />
-                  Full Stack Developer
-                </div>
-                <h1 className="max-w-[980px] text-[clamp(3.25rem,6.7vw,7.4rem)] font-semibold leading-[0.92] tracking-[-0.055em] text-white">
-                  พัฒนาเว็บแอปที่เน้น backend แข็งแรง และ product mindset ที่ใช้ได้จริง
-                </h1>
-                <p className="mt-7 max-w-2xl text-base leading-8 text-white/68 sm:text-lg md:text-xl">
-                  Full Stack Developer ที่ทำงานอยู่ตรงจุดตัดระหว่าง UI ที่สะอาด, API ที่เชื่อถือได้ และฐานข้อมูลที่ออกแบบมาเพื่อรองรับการใช้งานจริง
-                </p>
-                <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-                  <a
-                    href="#contact"
-                    className="rounded-full bg-white px-6 py-3 text-center text-sm font-semibold text-black shadow-[0_16px_50px_rgba(255,255,255,.12)] transition hover:bg-sky-100"
-                  >
-                    เริ่มโปรเจกต์
-                  </a>
-                  <a
-                    href="#work"
-                    className="rounded-full border border-white/16 bg-white/[0.045] px-6 py-3 text-center text-sm font-semibold text-white backdrop-blur-xl transition hover:border-sky-200/45 hover:bg-sky-300/10"
-                  >
-                    ดูผลงาน
-                  </a>
-                </div>
-              </div>
+            <motion.div
+              className="relative z-30 mx-auto flex h-full max-w-7xl transform-gpu items-center px-5 pt-24 will-change-transform sm:px-8 lg:pt-20"
+              style={{
+                y: reduceMotion ? 0 : heroTextY,
+                opacity: reduceMotion ? 1 : heroTextOpacity,
+              }}
+            >
+              <HeroCopy />
+            </motion.div>
 
-              <GlassCard className="hidden rounded-2xl bg-black/24 p-5 lg:block">
-                <p className="text-[11px] uppercase tracking-[0.24em] text-white/42">พร้อมรับงาน</p>
-                <p className="mt-3 text-xl font-semibold leading-snug tracking-[-0.03em]">
-                  ระบบ Full Stack, Backend และฐานข้อมูลที่ออกแบบมาเพื่อใช้งานจริง
-                </p>
-                <div className="mt-6 grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <p className="text-2xl font-semibold text-sky-100">25+</p>
-                    <p className="mt-1 text-white/42">เทคโนโลยีที่ใช้</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-semibold text-violet-100">1:1</p>
-                    <p className="mt-1 text-white/42">ส่งมอบงานตรง</p>
-                  </div>
-                </div>
-              </GlassCard>
-            </div>
-          </motion.div>
+            <motion.div
+              className="pointer-events-none absolute inset-x-5 top-[56%] z-30 mx-auto max-w-6xl -translate-y-1/2 transform-gpu will-change-transform md:top-[58%]"
+              style={{
+                opacity: reduceMotion ? 1 : stateOpacity,
+                y: reduceMotion ? 0 : stateY,
+                scale: reduceMotion ? 1 : stateScale,
+              }}
+            >
+              <DisplayState />
+            </motion.div>
+          </div>
+        </section>
 
-          <motion.div
-            className="pointer-events-none absolute inset-x-5 top-[56%] z-30 mx-auto max-w-6xl -translate-y-1/2 transform-gpu will-change-transform md:top-[58%]"
-            style={{
-              opacity: reduceMotion ? 1 : stateOpacity,
-              y: reduceMotion ? 0 : stateY,
-              scale: reduceMotion ? 1 : stateScale,
-            }}
-          >
-            <DisplayState />
-          </motion.div>
+        <div className="relative z-30 bg-[linear-gradient(180deg,#02030a_0%,#050713_34%,#03040c_100%)]">
+          <Content />
         </div>
-      </section>
+      </main>
+    </I18nCtx.Provider>
+  );
+}
 
-      <div className="relative z-30 bg-[linear-gradient(180deg,#02030a_0%,#050713_34%,#03040c_100%)]">
-        <Content />
+function HeroCopy() {
+  const { tx, lang } = useI18n();
+  return (
+    <div className="grid w-full gap-8 lg:grid-cols-[minmax(0,1fr)_330px] lg:items-end xl:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="max-w-4xl">
+        <motion.div
+          className="mb-7 inline-flex items-center gap-3 rounded-full border border-white/[0.08] bg-black/30 px-4 py-2 text-[11px] font-medium tracking-[0.18em] text-sky-100/90 shadow-[0_18px_70px_rgba(0,0,0,.28)] backdrop-blur-2xl"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+          <span className="h-1.5 w-1.5 animate-glowPulse rounded-full bg-sky-300 shadow-[0_0_18px_rgba(56,189,248,.95)]" />
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={`${lang}-badge`}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.3 }}
+            >
+              {tx.hero.badge}
+            </motion.span>
+          </AnimatePresence>
+        </motion.div>
+
+        <AnimatePresence mode="wait">
+          <motion.h1
+            key={`${lang}-title`}
+            className="max-w-[980px] font-display text-[clamp(2.6rem,6.4vw,6.6rem)] font-semibold leading-[1] tracking-[-0.04em] text-white"
+            initial={{ opacity: 0, y: 18, filter: "blur(8px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: -8, filter: "blur(6px)" }}
+            transition={{ duration: 0.6, ease: [0.2, 0.8, 0.2, 1] }}
+          >
+            <span className="gradient-text">{tx.hero.title}</span>
+          </motion.h1>
+        </AnimatePresence>
+
+        <AnimatePresence mode="wait">
+          <motion.p
+            key={`${lang}-sub`}
+            className="mt-7 max-w-2xl text-base leading-8 text-white/68 sm:text-lg md:text-xl"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.45, delay: 0.05 }}
+          >
+            {tx.hero.sub}
+          </motion.p>
+        </AnimatePresence>
+
+        <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+          <MagneticLink
+            href="#contact"
+            className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-center text-sm font-semibold text-black shadow-[0_16px_50px_rgba(255,255,255,.12)] transition hover:bg-sky-100"
+          >
+            {tx.hero.cta1}
+          </MagneticLink>
+          <MagneticLink
+            href="#work"
+            className="inline-flex items-center justify-center rounded-full border border-white/16 bg-white/[0.045] px-6 py-3 text-center text-sm font-semibold text-white backdrop-blur-xl transition hover:border-sky-200/45 hover:bg-sky-300/10"
+          >
+            {tx.hero.cta2}
+          </MagneticLink>
+        </div>
       </div>
-    </main>
+
+      <TiltCard3D strength={6} className="hidden lg:block">
+        <GlassCard className="glass-border rounded-2xl bg-black/24 p-5">
+          <p className="text-[11px] tracking-[0.18em] text-white/52">{tx.hero.bookingLabel}</p>
+          <p className="mt-3 text-xl font-semibold leading-snug tracking-[-0.02em]">
+            {tx.hero.bookingTitle}
+          </p>
+          <div className="mt-6 grid grid-cols-2 gap-3 text-sm">
+            <div>
+              <p className="text-2xl font-semibold text-sky-100">{tx.hero.stat1}</p>
+              <p className="mt-1 text-white/45">{tx.hero.stat1Label}</p>
+            </div>
+            <div>
+              <p className="text-2xl font-semibold text-violet-100">{tx.hero.stat2}</p>
+              <p className="mt-1 text-white/45">{tx.hero.stat2Label}</p>
+            </div>
+          </div>
+        </GlassCard>
+      </TiltCard3D>
+    </div>
   );
 }
 
 function FloatingNav() {
+  const { tx, lang, setLang } = useI18n();
   return (
     <nav className="fixed left-0 right-0 top-4 z-50 px-4">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-full bg-black/34 px-4 py-3 shadow-[0_18px_80px_rgba(0,0,0,.32)] ring-1 ring-white/[0.08] backdrop-blur-2xl sm:px-5">
-        <a href="#" className="flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.28em] text-white">
-          <span className="grid h-8 w-8 place-items-center rounded-full bg-white text-[11px] tracking-[-0.02em] text-black">
+      <motion.div
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-full bg-black/34 px-3 py-2 shadow-[0_18px_80px_rgba(0,0,0,.32)] ring-1 ring-white/[0.08] backdrop-blur-2xl sm:px-5 sm:py-3"
+      >
+        <a
+          href="#"
+          className="flex items-center gap-3 text-sm font-semibold tracking-[0.2em] text-white"
+        >
+          <motion.span
+            whileHover={{ rotate: 12, scale: 1.06 }}
+            transition={{ type: "spring", stiffness: 320, damping: 14 }}
+            className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-white via-sky-100 to-violet-200 text-[11px] tracking-[-0.02em] text-black shadow-[0_0_24px_rgba(125,211,252,0.35)]"
+          >
             CX
-          </span>
+          </motion.span>
           <span className="hidden sm:inline">CXN</span>
         </a>
+
         <div className="hidden items-center gap-1 rounded-full bg-white/[0.035] p-1 text-[11px] font-medium tracking-[0.12em] text-white/58 lg:flex">
-          {navItems.map((item) => (
+          {tx.nav.items.map((item) => (
             <a
               key={item.href}
               className="rounded-full px-4 py-2 transition hover:bg-white/[0.07] hover:text-white"
@@ -369,18 +972,23 @@ function FloatingNav() {
             </a>
           ))}
         </div>
-        <a
-          href="#contact"
-          className="rounded-full bg-sky-300 px-4 py-2 text-xs font-bold tracking-[0.08em] text-black shadow-[0_0_34px_rgba(56,189,248,.24)] transition hover:bg-white"
-        >
-          ติดต่อฉัน
-        </a>
-      </div>
+
+        <div className="flex items-center gap-2 sm:gap-3">
+          <LanguageToggle lang={lang} setLang={setLang} />
+          <MagneticLink
+            href="#contact"
+            className="hidden rounded-full bg-sky-300 px-4 py-2 text-xs font-bold tracking-[0.08em] text-black shadow-[0_0_34px_rgba(56,189,248,.24)] transition hover:bg-white sm:inline-flex"
+          >
+            {tx.nav.cta}
+          </MagneticLink>
+        </div>
+      </motion.div>
     </nav>
   );
 }
 
 function DisplayState() {
+  const { tx } = useI18n();
   return (
     <div className="hud-shell relative overflow-hidden rounded-[1.35rem] border border-white/[0.09] bg-[#050712]/88 shadow-[0_28px_110px_rgba(0,0,0,.45)] md:rounded-[1.8rem]">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_24%_18%,rgba(56,189,248,.15),transparent_18rem),radial-gradient(circle_at_82%_72%,rgba(139,92,246,.13),transparent_20rem)]" />
@@ -388,21 +996,20 @@ function DisplayState() {
       <div className="relative grid gap-px bg-white/[0.055] lg:grid-cols-[0.82fr_1.04fr_0.82fr]">
         <div className="hud-panel p-4 md:p-5">
           <div className="flex items-center justify-between gap-4">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-sky-200/72">
-              สถานะระบบ
+            <p className="text-[10px] font-semibold tracking-[0.22em] text-sky-200/72">
+              {tx.hud.eyebrow}
             </p>
-            <span className="rounded-full border border-emerald-300/18 bg-emerald-300/[0.08] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-100/80">
-              ออนไลน์
+            <span className="flex items-center gap-1.5 rounded-full border border-emerald-300/18 bg-emerald-300/[0.08] px-2.5 py-1 text-[10px] font-semibold tracking-[0.16em] text-emerald-100/80">
+              <span className="h-1.5 w-1.5 animate-glowPulse rounded-full bg-emerald-300" />
+              {tx.hud.live}
             </span>
           </div>
-          <p className="mt-4 text-xl font-semibold tracking-[-0.04em] text-white md:text-2xl">
-            ระบบพร้อมใช้งาน
+          <p className="mt-4 text-xl font-semibold tracking-[-0.03em] text-white md:text-2xl">
+            {tx.hud.title}
           </p>
-          <p className="mt-3 hidden text-sm leading-6 text-white/48 md:block">
-            UI, API, Database และระบบ automation ทำงานสอดประสานกันเป็น build เดียว
-          </p>
+          <p className="mt-3 hidden text-sm leading-6 text-white/48 md:block">{tx.hud.desc}</p>
           <div className="mt-5 hidden grid-cols-3 gap-2 md:grid">
-            {["UI", "API", "DB"].map((item, index) => (
+            {tx.hud.tags.map((item, index) => (
               <span
                 key={item}
                 className="rounded-full border border-white/[0.07] bg-white/[0.035] px-3 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-white/50"
@@ -418,40 +1025,38 @@ function DisplayState() {
           <div className="absolute inset-x-5 top-1/2 h-px bg-gradient-to-r from-transparent via-sky-200/22 to-transparent" />
           <div className="absolute left-1/2 top-5 h-[calc(100%-2.5rem)] w-px bg-gradient-to-b from-transparent via-violet-200/16 to-transparent" />
           <div className="grid grid-cols-2 gap-3">
-            {[
-              ["Frontend", "96%", "w-[96%]"],
-              ["Backend", "92%", "w-[92%]"],
-              ["Database", "88%", "w-[88%]"],
-              ["DevOps", "74%", "w-[74%]"],
-            ].map(([label, value, width], index) => (
-              <div
-                key={label}
-                className={`relative rounded-2xl border border-white/[0.07] bg-black/18 p-3 ${
-                  index > 1 ? "hidden md:block" : ""
-                }`}
-              >
-                <p className="text-[10px] uppercase tracking-[0.22em] text-white/36">{label}</p>
-                <p className="mt-3 text-lg font-semibold text-white/88 md:text-xl">{value}</p>
-                <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/[0.07]">
-                  <span
-                    className={`hud-meter block h-full rounded-full bg-gradient-to-r from-sky-300 to-violet-300 ${width}`}
-                    style={{ animationDelay: `${index * 0.18}s` }}
-                  />
+            {tx.hud.meters.map(([label, value], index) => {
+              const widthClass = ["w-[96%]", "w-[92%]", "w-[88%]", "w-[74%]"][index];
+              return (
+                <div
+                  key={label}
+                  className={`relative rounded-2xl border border-white/[0.07] bg-black/18 p-3 ${
+                    index > 1 ? "hidden md:block" : ""
+                  }`}
+                >
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-white/36">{label}</p>
+                  <p className="mt-3 text-lg font-semibold text-white/88 md:text-xl">{value}</p>
+                  <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/[0.07]">
+                    <span
+                      className={`hud-meter block h-full rounded-full bg-gradient-to-r from-sky-300 to-violet-300 ${widthClass}`}
+                      style={{ animationDelay: `${index * 0.18}s` }}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
         <div className="hud-panel hidden p-5 lg:block">
-          <p className="text-[10px] uppercase tracking-[0.22em] text-violet-200/62">ลำดับงาน</p>
+          <p className="text-[10px] tracking-[0.22em] text-violet-200/62">{tx.hud.queueEyebrow}</p>
           <div className="mt-5 space-y-4">
-            {[
-              ["01", "วางขอบเขตชัดเจน"],
-              ["02", "Prototype พร้อมทดสอบ"],
-              ["03", "ส่งขึ้น Production"],
-            ].map(([step, item], index) => (
-              <div key={item} className="hud-row flex items-center gap-3 text-sm text-white/62" style={{ animationDelay: `${index * 0.28}s` }}>
+            {tx.hud.queue.map(([step, item], index) => (
+              <div
+                key={item}
+                className="hud-row flex items-center gap-3 text-sm text-white/62"
+                style={{ animationDelay: `${index * 0.28}s` }}
+              >
                 <span className="grid h-7 w-7 place-items-center rounded-full border border-sky-200/14 bg-sky-300/[0.06] text-[10px] text-sky-100/70">
                   {step}
                 </span>
@@ -461,8 +1066,8 @@ function DisplayState() {
           </div>
           <div className="mt-6 rounded-2xl border border-white/[0.07] bg-black/18 p-3">
             <div className="flex items-center justify-between text-[10px] uppercase tracking-[0.18em] text-white/36">
-              <span>สัญญาณ</span>
-              <span>เสถียร</span>
+              <span>{tx.hud.signal}</span>
+              <span>{tx.hud.stable}</span>
             </div>
             <div className="mt-3 flex h-10 items-end gap-1">
               {[40, 68, 52, 82, 60, 92, 76, 58, 86, 70].map((height, index) => (
@@ -481,9 +1086,11 @@ function DisplayState() {
 }
 
 function Content() {
+  const { tx } = useI18n();
   return (
     <>
-      <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 md:py-24">
+      <FloatingOrbs />
+      <div className="relative mx-auto max-w-7xl px-5 py-16 sm:px-8 md:py-24">
         <motion.section
           id="profile"
           className="scroll-mt-32 grid gap-10 pt-24 pb-12 lg:grid-cols-[0.72fr_1.28fr] lg:pb-20"
@@ -492,18 +1099,17 @@ function Content() {
           viewport={{ once: true, amount: 0.28 }}
           transition={{ duration: 0.75, ease: "easeOut" }}
         >
-          <SectionEyebrow>เกี่ยวกับฉัน</SectionEyebrow>
+          <SectionEyebrow>{tx.profile.eyebrow}</SectionEyebrow>
           <div>
-            <h2 className="max-w-4xl text-3xl font-semibold leading-[1.04] tracking-[-0.04em] md:text-6xl">
-              พัฒนาเว็บแอปด้วย backend ที่แข็งแรง บน mindset ของ product engineering ที่ใช้งานได้จริง
-            </h2>
+            <RevealText
+              as="h2"
+              className="max-w-4xl font-display text-3xl font-semibold leading-[1.04] tracking-[-0.03em] md:text-5xl"
+            >
+              {tx.profile.title}
+            </RevealText>
             <div className="mt-8 grid gap-5 text-base leading-8 text-white/58 md:grid-cols-2">
-              <p>
-                งานของฉันอยู่ตรงจุดตัดระหว่าง UI ที่สะอาด, API ที่เชื่อถือได้ และฐานข้อมูลที่ออกแบบมาให้รองรับการใช้งานจริงในระยะยาว
-              </p>
-              <p>
-                สนใจเรื่อง AI, system design, Kubernetes และสถาปัตยกรรมที่พร้อม production สามารถทำงานได้ตั้งแต่ frontend UX ไปจนถึง backend และ deployment workflow
-              </p>
+              <RevealText as="p" delay={0.1}>{tx.profile.p1}</RevealText>
+              <RevealText as="p" delay={0.2}>{tx.profile.p2}</RevealText>
             </div>
           </div>
         </motion.section>
@@ -515,63 +1121,77 @@ function Content() {
           viewport={{ once: true, amount: 0.35 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
         >
-          {[
-            ["จุดเด่น", "Full Stack Web App, Backend, Database"],
-            ["สไตล์การทำงาน", "ตรงไปตรงมา มีเอกสาร ทำงานแบบ async ได้"],
-            ["ประสบการณ์", "Frontend ที่ละเอียด + Backend ที่เข้าใจ business"],
-          ].map(([label, value]) => (
-            <div key={label} className="bg-[#050712] p-5">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-sky-200/60">{label}</p>
+          {tx.cards.map(([label, value], index) => (
+            <motion.div
+              key={label}
+              className="group relative overflow-hidden bg-[#050712] p-5 transition-colors hover:bg-[#0a0d1c]"
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.5 }}
+              transition={{ duration: 0.55, delay: index * 0.08, ease: "easeOut" }}
+            >
+              <span className="pointer-events-none absolute -left-1/2 top-0 h-full w-[200%] -translate-x-full animate-shimmer bg-[linear-gradient(115deg,transparent_30%,rgba(125,211,252,0.07)_50%,transparent_70%)] [animation-play-state:paused] group-hover:[animation-play-state:running]" />
+              <p className="text-[11px] tracking-[0.18em] text-sky-200/60">{label}</p>
               <p className="mt-3 text-lg font-semibold tracking-[-0.02em] text-white/88">{value}</p>
-            </div>
+            </motion.div>
           ))}
         </motion.section>
 
         <section id="services" className="scroll-mt-32 py-16 md:py-20">
-          <SectionHeader eyebrow="บริการ" title="งานเขียนโค้ดที่ทำให้ product พร้อมใช้งานจริงตั้งแต่บรรทัดแรก" />
-          <div className="mt-10 divide-y divide-white/[0.08] border-y border-white/[0.08]">
-            {services.map((service, index) => (
+          <SectionHeader eyebrow={tx.services.eyebrow} title={tx.services.title} />
+          <div className="mt-10 grid gap-4 md:grid-cols-2">
+            {tx.services.items.map(([title, copy], index) => (
               <motion.div
-                key={service.title}
-                className="grid gap-4 py-6 md:grid-cols-[0.18fr_0.32fr_0.5fr] md:items-start"
-                initial={{ opacity: 0, y: 22 }}
+                key={title}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.35 }}
-                transition={{ duration: 0.58, ease: "easeOut", delay: Math.min(index * 0.04, 0.18) }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.55, delay: Math.min(index * 0.05, 0.25), ease: "easeOut" }}
               >
-                <div className="flex items-center gap-4">
-                  <span className="text-[11px] uppercase tracking-[0.24em] text-white/32">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <span className="h-px w-12 bg-gradient-to-r from-sky-300/70 to-transparent" />
-                </div>
-                <h3 className="text-xl font-semibold tracking-[-0.025em] md:text-2xl">{service.title}</h3>
-                <p className="max-w-2xl text-sm leading-7 text-white/54 md:text-base">{service.copy}</p>
+                <TiltCard3D strength={6} className="h-full">
+                  <div className="group relative h-full overflow-hidden rounded-[1.4rem] border border-white/[0.07] bg-white/[0.025] p-6 transition-colors hover:border-sky-300/30 hover:bg-white/[0.045]">
+                    <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-sky-400/[0.06] blur-3xl transition-opacity duration-500 group-hover:opacity-100 lg:opacity-0" />
+                    <div className="flex items-center gap-3">
+                      <span className="text-[11px] tracking-[0.18em] text-white/32">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <span className="h-px w-12 bg-gradient-to-r from-sky-300/70 to-transparent transition-all duration-500 group-hover:w-20" />
+                    </div>
+                    <h3 className="mt-5 text-xl font-semibold tracking-[-0.02em] md:text-2xl">{title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-white/55 md:text-base">{copy}</p>
+                  </div>
+                </TiltCard3D>
               </motion.div>
             ))}
           </div>
         </section>
 
         <section id="work" className="scroll-mt-32 py-16 md:py-20">
-          <SectionHeader eyebrow="ผลงานที่เลือกมา" title="ตัวอย่างงานที่ออกแบบมาเพื่อใช้งานจริง ไม่ใช่แค่ demo" />
+          <SectionHeader eyebrow={tx.work.eyebrow} title={tx.work.title} />
           <div className="mt-10 space-y-4">
-            {projects.map((project) => (
+            {tx.work.items.map((project, index) => (
               <motion.div
                 key={project.title}
-                className="grid gap-5 rounded-[1.4rem] border border-white/[0.08] bg-white/[0.025] p-5 md:grid-cols-[0.42fr_0.58fr] md:p-6"
                 initial={{ opacity: 0, y: 28 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.65, ease: "easeOut" }}
+                transition={{ duration: 0.65, delay: index * 0.06, ease: "easeOut" }}
               >
-                <div>
-                  <div className="flex items-start justify-between gap-4">
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-violet-200/58">{project.type}</p>
-                    <span className="rounded-full bg-white/[0.05] px-3 py-1 text-xs text-white/48">{project.metric}</span>
+                <TiltCard3D strength={4}>
+                  <div className="group relative grid gap-5 overflow-hidden rounded-[1.4rem] border border-white/[0.08] bg-white/[0.025] p-5 transition-all duration-500 hover:border-violet-300/25 hover:bg-white/[0.04] md:grid-cols-[0.42fr_0.58fr] md:p-6">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-sky-300/0 via-violet-300/40 to-sky-300/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                    <div>
+                      <div className="flex items-start justify-between gap-4">
+                        <p className="text-[11px] tracking-[0.18em] text-violet-200/58">{project.type}</p>
+                        <span className="rounded-full bg-white/[0.05] px-3 py-1 text-xs text-white/48">{project.metric}</span>
+                      </div>
+                      <h3 className="mt-10 font-display text-3xl font-semibold tracking-[-0.03em]">
+                        {project.title}
+                      </h3>
+                    </div>
+                    <p className="self-end leading-7 text-white/60">{project.copy}</p>
                   </div>
-                  <h3 className="mt-10 text-3xl font-semibold tracking-[-0.04em]">{project.title}</h3>
-                </div>
-                <p className="self-end leading-7 text-white/55">{project.copy}</p>
+                </TiltCard3D>
               </motion.div>
             ))}
           </div>
@@ -579,20 +1199,23 @@ function Content() {
 
         <section id="process" className="scroll-mt-32 grid gap-10 py-16 md:py-20 lg:grid-cols-[0.85fr_1.15fr]">
           <div>
-            <SectionEyebrow>กระบวนการทำงาน</SectionEyebrow>
-            <h2 className="mt-5 text-3xl font-semibold leading-[1.05] tracking-[-0.04em] md:text-5xl">
-              ส่งมอบงานอย่างเรียบง่าย ตัดสินใจชัดเจน ไม่มีความซับซ้อนที่ไม่จำเป็น
-            </h2>
+            <SectionEyebrow>{tx.process.eyebrow}</SectionEyebrow>
+            <RevealText
+              as="h2"
+              className="mt-5 font-display text-3xl font-semibold leading-[1.05] tracking-[-0.03em] md:text-5xl"
+            >
+              {tx.process.title}
+            </RevealText>
           </div>
           <div className="divide-y divide-white/[0.08] border-y border-white/[0.08]">
-            {process.map((item, index) => (
+            {tx.process.steps.map((item, index) => (
               <motion.div
                 key={item}
                 className="grid gap-4 py-6 sm:grid-cols-[80px_1fr]"
                 initial={{ opacity: 0, x: -18 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.4 }}
-                transition={{ duration: 0.55, ease: "easeOut", delay: index * 0.05 }}
+                transition={{ duration: 0.55, ease: "easeOut", delay: index * 0.08 }}
               >
                 <span className="text-sm font-semibold text-sky-200/70">0{index + 1}</span>
                 <p className="text-lg leading-8 text-white/70">{item}</p>
@@ -602,118 +1225,160 @@ function Content() {
         </section>
 
         <section id="stack" className="scroll-mt-32 py-16 md:py-20">
-          <SectionHeader eyebrow="Core Stack" title="เครื่องมือที่ใช้จริง เลือกมาเพื่อความเร็ว ดูแลง่าย และพร้อม deploy" />
-          <div className="mt-10 flex flex-wrap gap-3">
-            {stack.map((item) => (
-              <span
-                key={item}
-                className="rounded-full border border-white/[0.08] bg-white/[0.035] px-4 py-2 text-sm text-white/66 backdrop-blur-xl"
-              >
-                {item}
-              </span>
-            ))}
+          <SectionHeader eyebrow={tx.stack.eyebrow} title={tx.stack.title} />
+          <div className="mt-10 space-y-3">
+            <Marquee items={stack.slice(0, 13)} />
+            <Marquee items={stack.slice(13)} reverse />
           </div>
         </section>
 
         <section id="focus" className="scroll-mt-32 grid gap-6 py-16 md:py-20 lg:grid-cols-[1fr_0.9fr]">
           <div>
-            <SectionHeader eyebrow="โฟกัสปัจจุบัน" title="กำลังทำอะไร และสนใจเรื่องไหนเป็นพิเศษในตอนนี้" />
+            <SectionHeader eyebrow={tx.focus.eyebrow} title={tx.focus.title} />
             <div className="mt-9 divide-y divide-white/[0.08] overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.035] backdrop-blur-2xl">
-              {capabilityRows.map(([title, copy]) => (
-                <div key={title} className="grid gap-2 p-5 sm:grid-cols-[0.35fr_0.65fr]">
-                  <p className="font-semibold text-white/86">{title}</p>
+              {tx.focus.items.map(([title, copy], index) => (
+                <motion.div
+                  key={title}
+                  className="group grid gap-2 p-5 transition-colors hover:bg-white/[0.03] sm:grid-cols-[0.35fr_0.65fr]"
+                  initial={{ opacity: 0, x: -16 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, amount: 0.5 }}
+                  transition={{ duration: 0.5, delay: index * 0.07, ease: "easeOut" }}
+                >
+                  <p className="font-semibold text-white/86 transition-colors group-hover:text-sky-200">{title}</p>
                   <p className="text-sm leading-7 text-white/52">{copy}</p>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
-          <div className="rounded-[1.6rem] border border-white/[0.08] bg-[#050712] p-6">
-            <div className="flex items-center justify-between">
-              <p className="text-[11px] uppercase tracking-[0.24em] text-sky-200/70">ภาพรวมระบบ</p>
-              <span className="rounded-full border border-emerald-300/18 bg-emerald-300/[0.08] px-3 py-1 text-xs text-emerald-100">
-                Stable
-              </span>
-            </div>
-            <div className="mt-8 rounded-2xl border border-white/[0.08] bg-black/32 p-5">
-              <p className="text-sm text-white/45">api.cxndizz.dev</p>
-              <p className="mt-3 text-5xl font-semibold tracking-[-0.05em]">99.8%</p>
-              <div className="mt-7 grid grid-cols-2 gap-3 text-sm text-white/62">
-                {["API Health", "DB Status", "Cache Layer", "Background Jobs"].map((item) => (
-                  <div key={item} className="rounded-xl border border-white/[0.06] bg-white/[0.04] p-3">
-                    {item}
-                  </div>
-                ))}
+          <TiltCard3D strength={5}>
+            <motion.div
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+              className="glass-border relative h-full overflow-hidden rounded-[1.6rem] border border-white/[0.08] bg-[#050712] p-6"
+            >
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] tracking-[0.18em] text-sky-200/70">{tx.focus.snapshotEyebrow}</p>
+                <span className="flex items-center gap-1.5 rounded-full border border-emerald-300/18 bg-emerald-300/[0.08] px-3 py-1 text-xs text-emerald-100">
+                  <span className="h-1.5 w-1.5 animate-glowPulse rounded-full bg-emerald-300" />
+                  {tx.focus.snapshotStatus}
+                </span>
               </div>
-            </div>
-            <p className="mt-5 text-sm leading-6 text-white/45">
-              ตัวอย่างการ์ดสรุปสถานะระบบ ใช้แสดง health check ของ API, ฐานข้อมูล และ background job ในรูปแบบที่อ่านง่าย
-            </p>
-          </div>
+              <div className="mt-8 rounded-2xl border border-white/[0.08] bg-black/32 p-5">
+                <p className="text-sm font-mono text-white/45">{tx.focus.snapshotEndpoint}</p>
+                <p className="mt-3 font-display text-5xl font-semibold tracking-[-0.04em]">
+                  <CountUp to={tx.focus.snapshotMetric} suffix="%" />
+                </p>
+                <div className="mt-7 grid grid-cols-2 gap-3 text-sm text-white/62">
+                  {tx.focus.snapshotItems.map((item, idx) => (
+                    <motion.div
+                      key={item}
+                      initial={{ opacity: 0, y: 10 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.6 }}
+                      transition={{ duration: 0.4, delay: 0.3 + idx * 0.08 }}
+                      className="rounded-xl border border-white/[0.06] bg-white/[0.04] p-3 transition-colors hover:border-sky-300/30 hover:bg-sky-300/[0.05]"
+                    >
+                      {item}
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+              <p className="mt-5 text-sm leading-6 text-white/45">{tx.focus.snapshotCaption}</p>
+            </motion.div>
+          </TiltCard3D>
         </section>
 
         <section className="py-16 md:py-20">
-          <div className="rounded-[2rem] border border-white/[0.08] bg-[radial-gradient(circle_at_18%_20%,rgba(56,189,248,.16),transparent_28rem),radial-gradient(circle_at_84%_40%,rgba(139,92,246,.12),transparent_25rem),rgba(255,255,255,.035)] p-6 backdrop-blur-2xl sm:p-8 lg:p-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.7 }}
+            className="glass-border rounded-[2rem] border border-white/[0.08] bg-[radial-gradient(circle_at_18%_20%,rgba(56,189,248,.16),transparent_28rem),radial-gradient(circle_at_84%_40%,rgba(139,92,246,.12),transparent_25rem),rgba(255,255,255,.035)] p-6 backdrop-blur-2xl sm:p-8 lg:p-10"
+          >
             <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
-              <SectionEyebrow>เหมาะกับใคร</SectionEyebrow>
+              <SectionEyebrow>{tx.fit.eyebrow}</SectionEyebrow>
               <div>
-                <h2 className="text-3xl font-semibold leading-[1.04] tracking-[-0.04em] md:text-5xl">
-                  เหมาะกับเจ้าของไอเดียและทีมที่ต้องการคนสร้างจริง ไม่ใช่แค่คนรับงานต่อ
-                </h2>
+                <RevealText
+                  as="h2"
+                  className="font-display text-3xl font-semibold leading-[1.04] tracking-[-0.03em] md:text-5xl"
+                >
+                  {tx.fit.title}
+                </RevealText>
                 <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                  {[
-                    "มีไอเดียโปรดักต์ชัดเจน แต่ต้องการคนช่วย execute ให้ได้จริง",
-                    "ต้องการ frontend ที่ละเอียดและ backend ที่ตามมาได้ครบ",
-                    "อยากได้ระบบที่เชื่อมกับ LINE หรือ workflow อัตโนมัติ",
-                    "ใส่ใจรายละเอียดบนทุกอุปกรณ์และความเสถียรของระบบ",
-                  ].map((item) => (
-                    <div key={item} className="rounded-2xl bg-black/22 p-4 text-sm leading-7 text-white/58">
+                  {tx.fit.items.map((item, idx) => (
+                    <motion.div
+                      key={item}
+                      initial={{ opacity: 0, y: 14 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.4 }}
+                      transition={{ duration: 0.45, delay: idx * 0.08 }}
+                      className="group rounded-2xl bg-black/22 p-4 text-sm leading-7 text-white/58 transition-all hover:bg-black/40 hover:text-white/80"
+                    >
+                      <span className="mr-2 inline-block h-1.5 w-1.5 translate-y-[-2px] rounded-full bg-sky-300/60 transition-all group-hover:bg-sky-300 group-hover:shadow-[0_0_12px_rgba(56,189,248,0.6)]" />
                       {item}
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </section>
 
         <section id="contact" className="scroll-mt-32 py-16 md:py-20">
-          <div className="grid gap-8 rounded-[2rem] border border-white/[0.09] bg-white/[0.045] p-6 shadow-[0_26px_110px_rgba(0,0,0,.32)] backdrop-blur-2xl sm:p-8 lg:grid-cols-[1fr_auto] lg:p-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.75 }}
+            className="glass-border grid gap-8 rounded-[2rem] border border-white/[0.09] bg-white/[0.045] p-6 shadow-[0_26px_110px_rgba(0,0,0,.32)] backdrop-blur-2xl sm:p-8 lg:grid-cols-[1fr_auto] lg:p-10"
+          >
             <div>
-              <p className="text-[11px] uppercase tracking-[0.28em] text-sky-200/70">ติดต่อฉัน</p>
-              <h2 className="mt-5 max-w-3xl text-4xl font-semibold leading-[1] tracking-[-0.05em] md:text-6xl">
-                มาช่วยกันสร้างส่วนของ product ที่ผู้ใช้สัมผัสจริง ๆ
-              </h2>
-              <p className="mt-6 max-w-2xl leading-8 text-white/55">
-                บอกเป้าหมายของโปรดักต์ สถานะปัจจุบัน และส่วนที่กังวลที่สุดมาได้เลย จะช่วยวางแผนการพัฒนาที่ใช้งานได้จริงให้
-              </p>
+              <p className="text-[11px] tracking-[0.22em] text-sky-200/70">{tx.contact.eyebrow}</p>
+              <RevealText
+                as="h2"
+                className="mt-5 max-w-3xl font-display text-4xl font-semibold leading-[1.02] tracking-[-0.03em] md:text-6xl"
+              >
+                {tx.contact.title}
+              </RevealText>
+              <p className="mt-6 max-w-2xl leading-8 text-white/55">{tx.contact.desc}</p>
               <div className="mt-8 grid gap-3 text-sm text-white/68 sm:grid-cols-2">
                 <a
                   href="mailto:khun.chakkri@gmail.com"
-                  className="flex items-center justify-between gap-3 rounded-2xl border border-white/[0.08] bg-black/22 p-4 transition hover:border-sky-200/40 hover:bg-sky-300/[0.06]"
+                  className="hover-lift flex items-center justify-between gap-3 rounded-2xl border border-white/[0.08] bg-black/22 p-4 transition hover:border-sky-200/40 hover:bg-sky-300/[0.06]"
                 >
-                  <span className="text-[11px] uppercase tracking-[0.22em] text-white/42">Email</span>
+                  <span className="text-[11px] tracking-[0.18em] text-white/42">{tx.contact.emailLabel}</span>
                   <span className="text-white/86">khun.chakkri@gmail.com</span>
                 </a>
                 <a
                   href="https://github.com/cxndizz"
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center justify-between gap-3 rounded-2xl border border-white/[0.08] bg-black/22 p-4 transition hover:border-sky-200/40 hover:bg-sky-300/[0.06]"
+                  className="hover-lift flex items-center justify-between gap-3 rounded-2xl border border-white/[0.08] bg-black/22 p-4 transition hover:border-sky-200/40 hover:bg-sky-300/[0.06]"
                 >
-                  <span className="text-[11px] uppercase tracking-[0.22em] text-white/42">GitHub</span>
+                  <span className="text-[11px] tracking-[0.18em] text-white/42">{tx.contact.githubLabel}</span>
                   <span className="text-white/86">github.com/cxndizz</span>
                 </a>
               </div>
             </div>
             <div className="flex flex-col justify-end gap-3 sm:flex-row lg:flex-col">
-              <a href="mailto:khun.chakkri@gmail.com" className="rounded-full bg-white px-6 py-3 text-center text-sm font-semibold text-black transition hover:bg-sky-100">
-                ส่งอีเมลหาฉัน
-              </a>
-              <a href="#work" className="rounded-full border border-white/14 px-6 py-3 text-center text-sm font-semibold text-white/78 transition hover:bg-white/[0.06]">
-                ดูผลงานเพิ่มเติม
-              </a>
+              <MagneticLink
+                href="mailto:khun.chakkri@gmail.com"
+                className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-center text-sm font-semibold text-black transition hover:bg-sky-100"
+              >
+                {tx.contact.cta1}
+              </MagneticLink>
+              <MagneticLink
+                href="#work"
+                className="inline-flex items-center justify-center rounded-full border border-white/14 px-6 py-3 text-center text-sm font-semibold text-white/78 transition hover:bg-white/[0.06]"
+              >
+                {tx.contact.cta2}
+              </MagneticLink>
             </div>
-          </div>
+          </motion.div>
         </section>
       </div>
 
@@ -723,25 +1388,25 @@ function Content() {
 }
 
 function Footer() {
+  const { tx } = useI18n();
   return (
-    <footer className="border-t border-white/[0.06] bg-black/22">
+    <footer className="relative border-t border-white/[0.06] bg-black/22">
       <div className="mx-auto grid max-w-7xl gap-8 px-5 py-10 sm:px-8 md:grid-cols-[1fr_auto] md:items-end">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.3em]">CXN</p>
-          <p className="mt-4 max-w-xl text-sm leading-7 text-white/45">
-            Full Stack Developer ที่เน้นการพัฒนาเว็บแอป ระบบ backend และ database ที่ออกแบบมาเพื่อใช้งานจริง
-          </p>
+          <p className="font-display text-sm font-semibold tracking-[0.2em]">CXN</p>
+          <p className="mt-4 max-w-xl text-sm leading-7 text-white/45">{tx.footer.tagline}</p>
         </div>
         <div className="flex flex-wrap gap-4 text-sm text-white/45">
-          <a className="transition hover:text-white" href="#profile">เกี่ยวกับฉัน</a>
-          <a className="transition hover:text-white" href="#services">บริการ</a>
-          <a className="transition hover:text-white" href="#work">ผลงาน</a>
-          <a className="transition hover:text-white" href="#contact">ติดต่อ</a>
+          {tx.footer.links.map(([label, href]) => (
+            <a key={href} className="transition hover:text-white" href={href}>
+              {label}
+            </a>
+          ))}
         </div>
       </div>
-      <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 pb-8 text-xs uppercase tracking-[0.2em] text-white/30 sm:px-8 md:flex-row md:justify-between">
-        <p>© 2026 CXN. สงวนลิขสิทธิ์</p>
-        <p>ออกแบบมาเพื่อความเร็วและตอบสนองทุกอุปกรณ์</p>
+      <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 pb-8 text-xs tracking-[0.14em] text-white/30 sm:px-8 md:flex-row md:justify-between">
+        <p>{tx.footer.copy}</p>
+        <p>{tx.footer.built}</p>
       </div>
     </footer>
   );
@@ -749,9 +1414,7 @@ function Footer() {
 
 function SectionEyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-sky-200/68">
-      {children}
-    </p>
+    <p className="text-[11px] font-semibold tracking-[0.22em] text-sky-200/68">{children}</p>
   );
 }
 
@@ -759,9 +1422,12 @@ function SectionHeader({ eyebrow, title }: { eyebrow: string; title: string }) {
   return (
     <div>
       <SectionEyebrow>{eyebrow}</SectionEyebrow>
-      <h2 className="mt-5 max-w-4xl text-3xl font-semibold leading-[1.04] tracking-[-0.04em] md:text-5xl">
+      <RevealText
+        as="h2"
+        className="mt-5 max-w-4xl font-display text-3xl font-semibold leading-[1.04] tracking-[-0.03em] md:text-5xl"
+      >
         {title}
-      </h2>
+      </RevealText>
     </div>
   );
 }
